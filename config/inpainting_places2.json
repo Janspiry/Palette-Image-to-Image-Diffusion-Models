@@ -1,7 +1,7 @@
 {
     "name": "inpainting_places2", // experiments name
     "gpu_ids": [0], // gpu ids list, default is single 0
-    "seed" : 2022, // random seed, seed <0 represents randomization not used 
+    "seed" : -1, // random seed, seed <0 represents randomization not used 
     "finetune_norm": false, // find the parameters to optimize
 
     "path": { //set every part file path
@@ -19,23 +19,31 @@
                 "name": ["data.dataset", "InpaintDataset"], // import Dataset() class / function(not recommend) from data.dataset.py (default is [data.dataset.py])
                 "args":{ // arguments to initialize dataset
                     "data_root": "/data/jlw/datasets/place365/train.flist",
+                    "data_len": 1e5,
                     "mask_mode": "hybrid"
                 } 
             },
             "dataloader":{
-                "validation_split": 0, // percent or number 
-                "args":{ // arguments to initialize dataloader
-                    "batch_size": 32, // batch size in each gpu
+                "validation_split": 2, // percent or number 
+                "args":{ // arguments to initialize train_dataloader
+                    "batch_size": 4, // batch size in each gpu
                     "num_workers": 4,
                     "shuffle": true,
                     "pin_memory": true,
                     "drop_last": true
+                },
+                "val_args":{ // arguments to initialize valid_dataloader, will overwrite the parameters in train_dataloader
+                    "batch_size": 1, // batch size in each gpu
+                    "num_workers": 4,
+                    "shuffle": false,
+                    "pin_memory": true,
+                    "drop_last": false
                 }
             }
         },
         "test": { 
             "which_dataset": {
-                "name": "Dataset", // import Dataset() class / function(not recommend) from default file
+                "name": "InpaintDataset", // import Dataset() class / function(not recommend) from default file
                 "args":{
                     "data_root": "/data/jlw/datasets/place365/valid.flist",
                     "mask_mode": "center"
@@ -56,12 +64,12 @@
             "name": ["models.model", "Palette"], // import Model() class / function(not recommend) from models.model.py (default is [models.model.py])
             "args": {
                 "sample_num": 8, // process of each image
-                "task": "inpainting",
-                "ema_scheduler": { // not used now
-                    "step_start_ema": 5000,
-                    "update_ema_every": 1,
-                    "ema_decay": 0.9999
-                }
+                "task": "inpainting"
+                // "ema_scheduler": { // not used now
+                //     "step_start_ema": 5000,
+                //     "update_ema_every": 1,
+                //     "ema_decay": 0.9999
+                // }
             }
         }, 
         "which_networks": [ // import designated list of networks using arguments
@@ -73,18 +81,18 @@
                         "in_channel": 6,
                         "out_channel": 3,
                         "inner_channel": 64,
+                        "norm_groups": 16,
                         "channel_mults": [
                             1,
-                            1,
-                            2,
                             2,
                             4,
-                            4
+                            8,
+                            8
                         ],
                         "attn_res": [
-                            32,
-                            16,
-                            8
+                            // 32,
+                            16
+                            // 8
                         ],
                         "res_blocks": 2,
                         "dropout": 0.2,
@@ -110,9 +118,9 @@
         "which_optimizers": [ // len(networks) == len(optimizers) == len(lr_schedulers), it will be deleted after initialization if not used.
             { "name": "Adam", "args":{ "lr": 1e-4, "weight_decay": 0}}
         ],
-        "which_lr_schedulers": [
-            // {} // {} represents None, it will be deleted after initialization.
-            { "name": "LinearLR", "args": { "start_factor": 0.2, "total_iters": 10e3 }}
+        "which_lr_schedulers": [ // {} represents None, it will be deleted after initialization.
+            {}
+            // { "name": "LinearLR", "args": { "start_factor": 0.2, "total_iters": 1e3 }}
         ],
         "which_losses": [ // import designated list of losses without arguments
             "mse_loss" // import mse_loss() function/class from default file (default is [models/losses.py]), equivalent to { "name": "mse_loss", "args":{}}
@@ -125,8 +133,8 @@
     "train": { // arguments for basic training
         "n_epoch": 1e8, // max epochs, not limited now
         "n_iter": 1e8, // max interations
-        "val_epoch": 30, // valdation every specified number of epochs
-        "save_checkpoint_epoch": 30,
+        "val_epoch": 1, // valdation every specified number of epochs
+        "save_checkpoint_epoch": 1,
         "log_iter": 1e4, // log every specified number of iterations
         "tensorboard" : true // tensorboardX enable
     },
@@ -134,7 +142,7 @@
     "debug": { // arguments in debug mode, which will replace arguments in train
         "val_epoch": 1,
         "save_checkpoint_epoch": 1,
-        "log_iter": 30,
+        "log_iter": 10,
         "debug_split": 50 // percent or number, change the size of dataloder to debug_split.
     }
 }

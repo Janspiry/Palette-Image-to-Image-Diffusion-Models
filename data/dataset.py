@@ -17,11 +17,11 @@ def is_image_file(filename):
     return any(filename.endswith(extension) for extension in IMG_EXTENSIONS)
 
 def make_dataset(dir):
-    images = []
-    assert os.path.isdir(dir), '%s is not a valid directory' % dir
     if os.path.isfile(dir):
         images = [i for i in np.genfromtxt(dir, dtype=np.str, encoding='utf-8')]
     else:
+        images = []
+        assert os.path.isdir(dir), '%s is not a valid directory' % dir
         for root, _, fnames in sorted(os.walk(dir)):
             for fname in sorted(fnames):
                 if is_image_file(fname):
@@ -34,12 +34,16 @@ def pil_loader(path):
     return Image.open(path).convert('RGB')
 
 class InpaintDataset(data.Dataset):
-    def __init__(self, data_root, mask_mode, image_size=[256, 256], loader=pil_loader):
+    def __init__(self, data_root, mask_mode, data_len=-1, image_size=[256, 256], loader=pil_loader):
         imgs = make_dataset(data_root)
-        self.imgs = imgs
+        if data_len > 0:
+            self.imgs = imgs[:int(data_len)]
+        else:
+            self.imgs = imgs
         self.tfs = transforms.Compose([
                 transforms.Resize((image_size[0], image_size[1])),
-                transforms.ToTensor()
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5,0.5, 0.5])
         ])
         self.loader = loader
         self.mask_mode = mask_mode
@@ -51,7 +55,7 @@ class InpaintDataset(data.Dataset):
         path = self.imgs[index]
         img = self.tfs(self.loader(path))
         mask = self.get_mask()
-        mask_img = img * (1. - mask) + mask*torch.randn_like(img)
+        mask_img = img*(1. - mask) + mask*torch.randn_like(img)
 
         ret['gt_image'] = img
         ret['cond_image'] = mask_img
@@ -67,7 +71,7 @@ class InpaintDataset(data.Dataset):
             mask = bbox2mask(self.image_size, random_bbox(**self.mask_config))
         elif self.mask_mode == 'center':
             h, w = self.image_size
-            mask = bbox2mask(self.image_size, (h//4, w//4, h, w))
+            mask = bbox2mask(self.image_size, (h//4, w//4, h//2, w//2))
         elif self.mask_mode == 'irregular':
             mask = get_irregular_mask(self.image_size, **self.mask_config)
         elif self.mask_mode == 'free_form':
@@ -81,4 +85,4 @@ class InpaintDataset(data.Dataset):
         else:
             raise NotImplementedError(
                 f'Mask mode {self.mask_mode} has not been implemented.')
-        return F.to_tensor(mask)
+        return torch.from_numpy(mask).permute(2,0,1)

@@ -112,12 +112,9 @@ class PositionalEncoding(nn.Module):
 
     def forward(self, noise_level):
         count = self.dim // 2
-        step = torch.arange(count, dtype=noise_level.dtype,
-                            device=noise_level.device) / count
-        encoding = noise_level.unsqueeze(
-            1) * torch.exp(-math.log(1e4) * step.unsqueeze(0))
-        encoding = torch.cat(
-            [torch.sin(encoding), torch.cos(encoding)], dim=-1)
+        step = torch.arange(count, dtype=noise_level.dtype, device=noise_level.device) / count
+        encoding = noise_level.unsqueeze(1) * torch.exp(-math.log(1e4) * step.unsqueeze(0))
+        encoding = torch.cat([torch.sin(encoding), torch.cos(encoding)], dim=-1)
         return encoding
 
 
@@ -132,8 +129,7 @@ class FeatureWiseAffine(nn.Module):
     def forward(self, x, noise_embed):
         batch = x.shape[0]
         if self.use_affine_level:
-            gamma, beta = self.noise_func(noise_embed).view(
-                batch, -1, 1, 1).chunk(2, dim=1)
+            gamma, beta = self.noise_func(noise_embed).view(batch, -1, 1, 1).chunk(2, dim=1)
             x = (1 + gamma) * x + beta
         else:
             x = x + self.noise_func(noise_embed).view(batch, -1, 1, 1)
@@ -184,8 +180,7 @@ class Block(nn.Module):
 class ResnetBlock(nn.Module):
     def __init__(self, dim, dim_out, noise_level_emb_dim=None, dropout=0, use_affine_level=False, norm_groups=32):
         super().__init__()
-        self.noise_func = FeatureWiseAffine(
-            noise_level_emb_dim, dim_out, use_affine_level)
+        self.noise_func = FeatureWiseAffine(noise_level_emb_dim, dim_out, use_affine_level)
 
         self.block1 = Block(dim, dim_out, groups=norm_groups)
         self.block2 = Block(dim_out, dim_out, groups=norm_groups, dropout=dropout)
@@ -219,9 +214,7 @@ class SelfAttention(nn.Module):
         qkv = self.qkv(norm).view(batch, n_head, head_dim * 3, height, width)
         query, key, value = qkv.chunk(3, dim=2)  # bhdyx
 
-        attn = torch.einsum(
-            "bnchw, bncyx -> bnhwyx", query, key
-        ).contiguous() / math.sqrt(channel)
+        attn = torch.einsum("bnchw, bncyx -> bnhwyx", query, key).contiguous() / math.sqrt(channel)
         attn = attn.view(batch, n_head, height, width, -1)
         attn = torch.softmax(attn, -1)
         attn = attn.view(batch, n_head, height, width, height, width)

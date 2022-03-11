@@ -3,10 +3,10 @@ import torch
 import tqdm
 from core.base_model import BaseModel
 from core.logger import LogTracker
-class Model(BaseModel):
+class Palette(BaseModel):
     def __init__(self, networks, optimizers, lr_schedulers, losses, sample_num, task, **kwargs):
         ''' must to init BaseModel with kwargs '''
-        super(Model, self).__init__(**kwargs)
+        super(Palette, self).__init__(**kwargs)
 
         ''' networks, dataloder, optimizers, losses, etc. '''
         self.loss_fn = losses[0]
@@ -37,8 +37,9 @@ class Model(BaseModel):
     
     def get_current_visuals(self):
         dict = {
-            'gt_image': self.gt_image.detach()[0].float().cpu(),
-            'cond_image': self.cond_image.detach()[0].float().cpu()
+            'gt_image': (self.gt_image.detach()[:2].float().cpu()+1)/2,
+            'cond_image': (self.cond_image.detach()[:2].float().cpu()+1)/2,
+            'mask': self.mask.detach()[:2].float().cpu()
         }
         return dict
 
@@ -75,7 +76,7 @@ class Model(BaseModel):
                 for key, value in self.train_metrics.result().items():
                     self.logger.info('{:5s}: {}\t'.format(str(key), value))
                 for key, value in self.get_current_visuals().items():
-                    self.writer.add_image(key, value)
+                    self.writer.add_images(key, value)
 
         for scheduler in self.schedulers:
             scheduler.step()
@@ -88,16 +89,18 @@ class Model(BaseModel):
             for val_data in tqdm.tqdm(self.val_loader):
                 self.set_input(val_data)
                 if self.task in ['inpainting','uncropping']:
-                    self.output = self.netG.restoration(self.cond_image, noise=self.cond_image, sample_num=self.sample_num)
+                    self.output = self.netG.restoration(self.cond_image, noise=self.cond_image, 
+                        gt_image=self.gt_image, mask=self.mask, sample_num=self.sample_num)
                 else:
-                    self.output = self.netG.restoration(self.cond_image, self.sample_num)
+                    self.output = self.netG.restoration(self.cond_image, gt_image=self.gt_image, 
+                        mask=self.mask, sample_num=self.sample_num)
                 self.iter += self.batch_size
                 self.writer.set_iter(self.epoch, self.iter, phase='val')
 
                 for met in self.metrics:
                     self.val_metrics.update(met.__name__, met(self.cond_image, self.output))
                 for key, value in self.get_current_visuals().items():
-                    self.writer.add_image(key, value)
+                    self.writer.add_images(key, value)
                 self.writer.save_images(self.save_current_results())
 
         return self.val_metrics.result()
@@ -108,15 +111,17 @@ class Model(BaseModel):
         for phase_data in tqdm.tqdm(self.phase_loader):
             self.set_input(phase_data)
             if self.task in ['inpainting','uncropping']:
-                self.output = self.netG.restoration(self.cond_image, noise=self.cond_image, sample_num=self.sample_num)
+                self.output = self.netG.restoration(self.cond_image, noise=self.cond_image, 
+                    gt_image=self.gt_image, mask=self.mask, sample_num=self.sample_num)
             else:
-                self.output = self.netG.restoration(self.cond_image, self.sample_num)
+                self.output = self.netG.restoration(self.cond_image, gt_image=self.gt_image, 
+                    mask=self.mask, sample_num=self.sample_num)
             self.iter += self.batch_size
             self.writer.set_iter(self.epoch, self.iter, phase='test')
             for met in self.metrics:
                 self.test_metrics.update(met.__name__, met(self.cond_image, self.output))
             for key, value in self.get_current_visuals().items():
-                self.writer.add_image(key, value)
+                self.writer.add_images(key, value)
             self.writer.save_images(self.save_current_results())
 
     def load_everything(self):

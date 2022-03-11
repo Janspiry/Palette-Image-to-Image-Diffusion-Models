@@ -12,7 +12,7 @@ def tensor2img(tensor, out_type=np.uint8, min_max=(-1, 1)):
     Input: 4D(B,(3/1),H,W), 3D(C,H,W), or 2D(H,W), any range, RGB channel order
     Output: 3D(H,W,C) or 2D(H,W), [0,255], np.uint8 (default)
     '''
-    tensor = tensor.squeeze().cpu().clamp_(*min_max)  # clamp
+    tensor = tensor.squeeze().clamp_(*min_max)  # clamp
     n_dim = tensor.dim()
     if n_dim == 4:
         n_img = len(tensor)
@@ -26,7 +26,7 @@ def tensor2img(tensor, out_type=np.uint8, min_max=(-1, 1)):
     else:
         raise TypeError('Only support 4D, 3D and 2D tensor. But received with dimension: {:d}'.format(n_dim))
     if out_type == np.uint8:
-        img_np = (img_np * 255.0).round()
+        img_np = ((img_np+1) * 127.5).round()
         # Important. Unlike matlab, numpy.unit8() WILL NOT round by default.
     return img_np.astype(out_type)
 

@@ -18,7 +18,7 @@ class BaseModel():
         self.set_device = partial(Util.set_device, rank=opt['global_rank'])
 
         ''' process record '''
-        self.batch_size = self.opt['datasets']['train']['dataloader']['args']['batch_size']
+        self.batch_size = self.opt['datasets'][self.phase]['dataloader']['args']['batch_size']
         self.epoch = 0
         self.iter = 0 
 
