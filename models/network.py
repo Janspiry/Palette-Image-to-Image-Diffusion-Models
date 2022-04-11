@@ -18,117 +18,82 @@ class Network(BaseNetwork):
 
     def set_new_noise_schedule(self, device=torch.device('cuda'), phase='train'):
         to_torch = partial(torch.tensor, dtype=torch.float32, device=device)
-        betas = make_beta_schedule(**self.beta_schedule[phase])
-        betas = betas.detach().cpu().numpy() if isinstance(betas, torch.Tensor) else betas
-        alphas = 1. - betas
-        timesteps, = betas.shape
+
+        alphas = make_schedule(**self.beta_schedule[phase])
+        alphas = alphas.detach().cpu().numpy() if isinstance(alphas, torch.Tensor) else alphas
+        gammas = np.cumprod(alphas, axis=0)
+
+        timesteps, = alphas.shape
         self.num_timesteps = int(timesteps)
 
-        alphas_cumprod = np.cumprod(alphas, axis=0)
-        alphas_cumprod_prev = np.append(1., alphas_cumprod[:-1])
-    
-        self.register_buffer('sqrt_alphas_cumprod_prev', to_torch(np.sqrt(np.append(1., alphas_cumprod))))
+        self.register_buffer('gammas', to_torch(gammas))
+        self.register_buffer('sqrt_gammas', to_torch(np.sqrt(gammas)))
+        self.register_buffer('sqrt_one_minus_gammas', to_torch(np.sqrt(1-gammas)))
 
-        # calculations for diffusion q(x_t | x_{t-1}) and others
-        self.register_buffer('sqrt_recip_alphas_cumprod', to_torch(np.sqrt(1. / alphas_cumprod)))
-        self.register_buffer('sqrt_recipm1_alphas_cumprod', to_torch(np.sqrt(1. / alphas_cumprod - 1)))
+        self.register_buffer('one_minus_alphas', to_torch(1-alphas))
+        self.register_buffer('one_div_sqrt_alphas', to_torch(1./np.sqrt(alphas)))
+        self.register_buffer('sqrt_one_minus_alphas', to_torch(np.sqrt(1-alphas)))
 
-        # calculations for posterior q(x_{t-1} | x_t, x_0)
-        posterior_variance = betas
-        self.register_buffer('posterior_log_variance_clipped', to_torch(np.log(np.maximum(posterior_variance, 1e-20))))
-        self.register_buffer('posterior_mean_coef1', to_torch(betas * np.sqrt(alphas_cumprod_prev) / (1. - alphas_cumprod)))
-        self.register_buffer('posterior_mean_coef2', to_torch((1. - alphas_cumprod_prev) * np.sqrt(alphas) / (1. - alphas_cumprod)))
-
-    def predict_start_from_noise(self, x_t, t, noise):
-        return self.sqrt_recip_alphas_cumprod[t] * x_t - self.sqrt_recipm1_alphas_cumprod[t] * noise
-
-    def q_posterior(self, x_start, x_t, t):
-        posterior_mean = self.posterior_mean_coef1[t] * \
-            x_start + self.posterior_mean_coef2[t] * x_t
-        posterior_log_variance_clipped = self.posterior_log_variance_clipped[t]
-        return posterior_mean, posterior_log_variance_clipped
-
-    def p_mean_variance(self, x, t, clip_denoised, condition_x):
-        batch_size = x.shape[0]
-        noise_level = self.sqrt_alphas_cumprod_prev[t+1].repeat(batch_size, 1)
-        x_recon = self.predict_start_from_noise(x, t=t, noise=self.denoise_fn(torch.cat([condition_x, x], dim=1), noise_level))
-        
-        if clip_denoised:
-            x_recon.clamp_(-1., 1.)
-
-        model_mean, posterior_log_variance = self.q_posterior(x_start=x_recon, x_t=x, t=t)
-        return model_mean, posterior_log_variance
 
     @torch.no_grad()
-    def p_sample(self, x, t, clip_denoised=True, condition_x=None):
-        model_mean, model_log_variance = self.p_mean_variance(
-            x=x, t=t, clip_denoised=clip_denoised, condition_x=condition_x)
-        noise = torch.randn_like(x) if t > 0 else torch.zeros_like(x)
-        return model_mean + noise * (0.5 * model_log_variance).exp()
-
-    @torch.no_grad()
-    def p_sample_loop(self, x_in, noise=None, sample_num=8):
+    def restoration(self, y_cond, y_t=None, y_0=None, mask=None, sample_num=8):
         sample_inter = (self.num_timesteps//sample_num)
-        x_t = default(noise, lambda: torch.randn_like(x_in))
-        ret_img = x_in
-        for i in tqdm(reversed(range(0, self.num_timesteps)), desc='sampling loop time step', total=self.num_timesteps):
-            x_t = self.p_sample(x_t, i, condition_x=x_in)
-            if i % sample_inter == 0:
-                ret_img = torch.cat([ret_img, x_t], dim=0)
+        y_t = default(y_t, lambda: torch.randn_like(y_cond))
+        ret_img = y_t
+        for t in tqdm(reversed(range(1, self.num_timesteps+1)), desc='sampling loop time step', total=self.num_timesteps):
+            if t > 1:
+                z = torch.rand_like(y_cond)
+            else:
+                z = torch.zeros_like(y_cond)
+            u_t = extract(self.one_div_sqrt_alphas, t) * (
+                y_t - extract(self.one_minus_alphas, t)/extract(self.sqrt_one_minus_gammas, t) * self.denoise_fn(torch.cat([y_cond, y_t], dim=1), extract(self.gammas, t))
+            )
+            var_t =  extract(self.sqrt_one_minus_alphas, t) * z
+            y_t = u_t + var_t
+            if mask is not None:
+                y_t = y_0*(1.-mask) + mask*y_t
+            if t % sample_inter == 0:
+                ret_img = torch.cat([ret_img, y_t], dim=0)
         return ret_img
 
     
-    def q_sample(self, x_start, continuous_sqrt_alpha_cumprod, noise):
-        return (
-            continuous_sqrt_alpha_cumprod * x_start +
-            (1 - continuous_sqrt_alpha_cumprod**2).sqrt() * noise
-        )        
+    def forward(self, y_0, y_cond=None, mask=None, noise=None):
+        b, c, h, w = y_0.shape
+        t = np.random.randint(1, self.num_timesteps+1, size=(b, 1))
+        noise = default(noise, lambda: torch.randn_like(y_0))
 
-    @torch.no_grad()
-    def restoration(self, x_in, noise=None, gt_image=None, mask=None, sample_num=8):
-        ret = self.p_sample_loop(x_in, noise, sample_num) 
+        y_noisy = extract(self.sqrt_gammas, t) * y_0 + extract(self.sqrt_one_minus_gammas, t) * noise
         if mask is not None:
-            repeat_num = ret.shape[0]//mask.shape[0]
-            gt_image = gt_image.repeat(repeat_num, 1, 1, 1)
-            mask = mask.repeat(repeat_num, 1, 1, 1)
-            ret = gt_image*(1.-mask) + mask*ret
-        return ret
-
-    def forward(self, x_0, x_condition=None, mask=None, noise=None):
-        b, c, h, w = x_0.shape
-        t = np.random.randint(1, self.num_timesteps + 1)
-        continuous_sqrt_alpha_cumprod = torch.rand(b, device=x_0.device)*(self.sqrt_alphas_cumprod_prev[t]-self.sqrt_alphas_cumprod_prev[t-1])\
-            +self.sqrt_alphas_cumprod_prev[t-1]
-        continuous_sqrt_alpha_cumprod = continuous_sqrt_alpha_cumprod.view(b, -1)
-
-        noise = default(noise, lambda: torch.randn_like(x_0))
-        x_noisy = self.q_sample(
-            x_start=x_0, continuous_sqrt_alpha_cumprod=continuous_sqrt_alpha_cumprod.view(-1, 1, 1, 1), noise=noise)
-        x_recon = self.denoise_fn(torch.cat([x_condition, x_noisy], dim=1), continuous_sqrt_alpha_cumprod)
-        if mask is not None:
-            loss = self.loss_fn(mask*noise, mask*x_recon)
+            noise_pred = self.denoise_fn(torch.cat([y_cond, y_noisy*mask+(1.-mask)*y_0], dim=1), extract(self.gammas, t))
+            loss = self.loss_fn(mask*noise, mask*noise_pred)
         else:
-            loss = self.loss_fn(noise, x_recon)
+            noise_pred = self.denoise_fn(torch.cat([y_cond, y_noisy], dim=1), extract(self.gammas, t))
+            loss = self.loss_fn(noise, noise_pred)
         return loss
 
 
-def _warmup_beta(linear_start, linear_end, n_timestep, warmup_frac):
-    betas = linear_end * np.ones(n_timestep, dtype=np.float64)
-    warmup_time = int(n_timestep * warmup_frac)
-    betas[:warmup_time] = np.linspace(
-        linear_start, linear_end, warmup_time, dtype=np.float64)
-    return betas
+def exists(x):
+    return x is not None
 
+def default(val, d):
+    if exists(val):
+        return val
+    return d() if isfunction(d) else d
 
-def make_beta_schedule(schedule, n_timestep, linear_start=1e-4, linear_end=2e-2, cosine_s=8e-3):
+def extract(a, t, x_shape=(1,1,1,1)):
+    b, *_ = t.shape
+    out = a.gather(-1, t)
+    return out.reshape(b, *((1,) * (len(x_shape) - 1)))
+
+def make_schedule(schedule, n_timestep, linear_start=1e-4, linear_end=2e-2, cosine_s=8e-3):
     if schedule == 'quad':
         betas = np.linspace(linear_start ** 0.5, linear_end ** 0.5, n_timestep, dtype=np.float64) ** 2
     elif schedule == 'linear':
         betas = np.linspace(linear_start, linear_end, n_timestep, dtype=np.float64)
     elif schedule == 'warmup10':
-        betas = _warmup_beta(linear_start, linear_end, n_timestep, 0.1)
+        betas = _warmup(linear_start, linear_end, n_timestep, 0.1)
     elif schedule == 'warmup50':
-        betas = _warmup_beta(linear_start, linear_end, n_timestep, 0.5)
+        betas = _warmup(linear_start, linear_end, n_timestep, 0.5)
     elif schedule == 'const':
         betas = linear_end * np.ones(n_timestep, dtype=np.float64)
     elif schedule == 'jsd':  # 1/T, 1/(T-1), 1/(T-2), ..., 1
@@ -147,11 +112,9 @@ def make_beta_schedule(schedule, n_timestep, linear_start=1e-4, linear_end=2e-2,
         raise NotImplementedError(schedule)
     return betas
 
-def exists(x):
-    return x is not None
-
-def default(val, d):
-    if exists(val):
-        return val
-    return d() if isfunction(d) else d
-
+def _warmup(linear_start, linear_end, n_timestep, warmup_frac):
+    betas = linear_end * np.ones(n_timestep, dtype=np.float64)
+    warmup_time = int(n_timestep * warmup_frac)
+    betas[:warmup_time] = np.linspace(
+        linear_start, linear_end, warmup_time, dtype=np.float64)
+    return betas

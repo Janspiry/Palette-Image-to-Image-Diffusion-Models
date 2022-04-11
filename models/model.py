@@ -51,7 +51,7 @@ class Palette(BaseModel):
             ret_result.append(self.gt_image[idx].detach().float().cpu())
 
             ret_path.append('Process_{}'.format(self.path[idx]))
-            ret_result.append(self.output[idx::self.sample_num].detach().float().cpu())
+            ret_result.append(self.output[idx::self.batch_size].detach().float().cpu())
             
             ret_path.append('Out_{}'.format(self.path[idx]))
             ret_result.append(self.output[idx-self.batch_size].detach().float().cpu())
@@ -126,7 +126,7 @@ class Palette(BaseModel):
 
     def load_everything(self):
         """ save pretrained model and training state, which only do on GPU 0. """
-        self.load_network(network=self.netG, network_label=self.netG.__class__.__name__, strict=True)
+        self.load_network(network=self.netG, network_label=self.netG.__class__.__name__, strict=False)
         self.resume_training(self.schedulers, [self.optG]) 
 
     def save_everything(self):

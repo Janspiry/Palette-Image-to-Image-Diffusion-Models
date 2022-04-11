@@ -9,7 +9,7 @@
         "tb_logger": "tb_logger", // path of tensorboard logger
         "results": "results",
         "checkpoint": "checkpoint",
-        // "resume_state": "experiments/debug_base_220226_214326/checkpoint/100" 
+        // "resume_state": "experiments/inpainting_places2_220312_000041/checkpoint/15" 
         "resume_state": null // ex: 100, loading .state  and .pth from given epoch and iteration
     },
 
@@ -26,7 +26,7 @@
             "dataloader":{
                 "validation_split": 2, // percent or number 
                 "args":{ // arguments to initialize train_dataloader
-                    "batch_size": 4, // batch size in each gpu
+                    "batch_size": 8, // batch size in each gpu
                     "num_workers": 4,
                     "shuffle": true,
                     "pin_memory": true,
@@ -74,13 +74,13 @@
         }, 
         "which_networks": [ // import designated list of networks using arguments
             {
-                "name": "Network", // import Network() class / function(not recommend) from default file (default is [models/network.py]) 
+                "name": ["models.network_sr3", "Network"], // import Network() class / function(not recommend) from default file (default is [models/network.py]) 
                 "args": { // arguments to initialize network
                     "init_type": "kaiming", // method can be [normal | xavier| xavier_uniform | kaiming | orthogonal], default is kaiming
                     "unet": {
                         "in_channel": 6,
                         "out_channel": 3,
-                        "inner_channel": 64,
+                        "inner_channel": 32,
                         "norm_groups": 16,
                         "channel_mults": [
                             1,
@@ -116,7 +116,7 @@
             }
         ],
         "which_optimizers": [ // len(networks) == len(optimizers) == len(lr_schedulers), it will be deleted after initialization if not used.
-            { "name": "Adam", "args":{ "lr": 1e-4, "weight_decay": 0}}
+            { "name": "Adam", "args":{ "lr": 5e-6, "weight_decay": 0}}
         ],
         "which_lr_schedulers": [ // {} represents None, it will be deleted after initialization.
             {}
@@ -134,7 +134,7 @@
         "n_epoch": 1e8, // max epochs, not limited now
         "n_iter": 1e8, // max interations
         "val_epoch": 1, // valdation every specified number of epochs
-        "save_checkpoint_epoch": 1,
+        "save_checkpoint_epoch": 5,
         "log_iter": 1e4, // log every specified number of iterations
         "tensorboard" : true // tensorboardX enable
     },
