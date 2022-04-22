@@ -65,7 +65,7 @@ class Palette(BaseModel):
         for train_data in tqdm.tqdm(self.phase_loader):
             self.set_input(train_data)
             self.optG.zero_grad()
-            loss = self.netG(self.gt_image, x_condition=self.cond_image, mask=self.mask)
+            loss = self.netG(self.gt_image, self.cond_image, mask=self.mask)
             loss.backward()
             self.optG.step()
 
@@ -89,8 +89,8 @@ class Palette(BaseModel):
             for val_data in tqdm.tqdm(self.val_loader):
                 self.set_input(val_data)
                 if self.task in ['inpainting','uncropping']:
-                    self.output = self.netG.restoration(self.cond_image, noise=self.cond_image, 
-                        gt_image=self.gt_image, mask=self.mask, sample_num=self.sample_num)
+                    self.output = self.netG.restoration(self.cond_image, y_t=self.cond_image, 
+                        y_0=self.gt_image, mask=self.mask, sample_num=self.sample_num)
                 else:
                     self.output = self.netG.restoration(self.cond_image, gt_image=self.gt_image, 
                         mask=self.mask, sample_num=self.sample_num)
@@ -111,8 +111,8 @@ class Palette(BaseModel):
         for phase_data in tqdm.tqdm(self.phase_loader):
             self.set_input(phase_data)
             if self.task in ['inpainting','uncropping']:
-                self.output = self.netG.restoration(self.cond_image, noise=self.cond_image, 
-                    gt_image=self.gt_image, mask=self.mask, sample_num=self.sample_num)
+                self.output = self.netG.restoration(self.cond_image, y_t=self.cond_image, 
+                        y_0=self.gt_image, mask=self.mask, sample_num=self.sample_num)
             else:
                 self.output = self.netG.restoration(self.cond_image, gt_image=self.gt_image, 
                     mask=self.mask, sample_num=self.sample_num)

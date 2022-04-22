@@ -9,8 +9,8 @@
         "tb_logger": "tb_logger", // path of tensorboard logger
         "results": "results",
         "checkpoint": "checkpoint",
-        // "resume_state": "experiments/inpainting_places2_220312_000041/checkpoint/15" 
-        "resume_state": null // ex: 100, loading .state  and .pth from given epoch and iteration
+        "resume_state": "experiments/inpainting_places2_220413_143231/checkpoint/25" 
+        // "resume_state": null // ex: 100, loading .state  and .pth from given epoch and iteration
     },
 
     "datasets": { // train or test
@@ -74,7 +74,7 @@
         }, 
         "which_networks": [ // import designated list of networks using arguments
             {
-                "name": ["models.network_sr3", "Network"], // import Network() class / function(not recommend) from default file (default is [models/network.py]) 
+                "name": ["models.network", "Network"], // import Network() class / function(not recommend) from default file (default is [models/network.py]) 
                 "args": { // arguments to initialize network
                     "init_type": "kaiming", // method can be [normal | xavier| xavier_uniform | kaiming | orthogonal], default is kaiming
                     "unet": {

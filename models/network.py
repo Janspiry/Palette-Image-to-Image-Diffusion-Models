@@ -19,7 +19,8 @@ class Network(BaseNetwork):
     def set_new_noise_schedule(self, device=torch.device('cuda'), phase='train'):
         to_torch = partial(torch.tensor, dtype=torch.float32, device=device)
 
-        alphas = make_schedule(**self.beta_schedule[phase])
+        betas = make_schedule(**self.beta_schedule[phase])
+        alphas = 1. - betas
         alphas = alphas.detach().cpu().numpy() if isinstance(alphas, torch.Tensor) else alphas
         gammas = np.cumprod(alphas, axis=0)
 
@@ -31,25 +32,27 @@ class Network(BaseNetwork):
         self.register_buffer('sqrt_one_minus_gammas', to_torch(np.sqrt(1-gammas)))
 
         self.register_buffer('one_minus_alphas', to_torch(1-alphas))
-        self.register_buffer('one_div_sqrt_alphas', to_torch(1./np.sqrt(alphas)))
+        self.register_buffer('one_div_sqrt_alphas', to_torch(np.sqrt(1./alphas)))
         self.register_buffer('sqrt_one_minus_alphas', to_torch(np.sqrt(1-alphas)))
 
 
     @torch.no_grad()
     def restoration(self, y_cond, y_t=None, y_0=None, mask=None, sample_num=8):
+        b, *_ = y_cond.shape
         sample_inter = (self.num_timesteps//sample_num)
         y_t = default(y_t, lambda: torch.randn_like(y_cond))
         ret_img = y_t
-        for t in tqdm(reversed(range(1, self.num_timesteps+1)), desc='sampling loop time step', total=self.num_timesteps):
-            if t > 1:
-                z = torch.rand_like(y_cond)
-            else:
-                z = torch.zeros_like(y_cond)
+        for i in tqdm(reversed(range(0, self.num_timesteps)), desc='sampling loop time step', total=self.num_timesteps):
+            t = torch.full((b,), i, device=y_cond.device, dtype=torch.long)
+            noise_pred = self.denoise_fn(torch.cat([y_cond, y_t], dim=1), extract(self.gammas, t))
             u_t = extract(self.one_div_sqrt_alphas, t) * (
-                y_t - extract(self.one_minus_alphas, t)/extract(self.sqrt_one_minus_gammas, t) * self.denoise_fn(torch.cat([y_cond, y_t], dim=1), extract(self.gammas, t))
+                y_t - ((extract(self.one_minus_alphas, t) / extract(self.sqrt_one_minus_gammas, t)) * noise_pred)
             )
-            var_t =  extract(self.sqrt_one_minus_alphas, t) * z
-            y_t = u_t + var_t
+            if i>0:
+                var_t =  extract(self.sqrt_one_minus_alphas, t) * torch.rand_like(y_cond)
+                y_t = u_t + var_t
+            else:
+                y_t = u_t
             if mask is not None:
                 y_t = y_0*(1.-mask) + mask*y_t
             if t % sample_inter == 0:
@@ -57,9 +60,9 @@ class Network(BaseNetwork):
         return ret_img
 
     
-    def forward(self, y_0, y_cond=None, mask=None, noise=None):
-        b, c, h, w = y_0.shape
-        t = np.random.randint(1, self.num_timesteps+1, size=(b, 1))
+    def forward(self, y_0, y_cond, mask=None, noise=None):
+        b, *_ = y_0.shape
+        t = torch.randint(0, self.num_timesteps, (b,), device=y_0.device).long()
         noise = default(noise, lambda: torch.randn_like(y_0))
 
         y_noisy = extract(self.sqrt_gammas, t) * y_0 + extract(self.sqrt_one_minus_gammas, t) * noise

@@ -144,7 +144,6 @@ class Network(BaseNetwork):
         for i in tqdm(reversed(range(0, self.num_timesteps)), desc='sampling loop time step', total=self.num_timesteps):
             img = self.p_sample(img, i, condition_x=x_in)
             if mask is not None:
-                pass
                 img = gt_image*(1.-mask) + mask*img
             if i % sample_inter == 0:
                 ret_img = torch.cat([ret_img, img], dim=0)
@@ -168,6 +167,7 @@ class Network(BaseNetwork):
                 size=b
             )
         ).to(x_start.device)
+        
         continuous_sqrt_alpha_cumprod = continuous_sqrt_alpha_cumprod.view(b, -1)
 
         noise = default(noise, lambda: torch.randn_like(x_start))
