@@ -6,11 +6,12 @@
 
     "path": { //set every part file path
         "base_dir": "experiments", // base path for all log except resume_state
+        "code": "code", // code backup
         "tb_logger": "tb_logger", // path of tensorboard logger
         "results": "results",
         "checkpoint": "checkpoint",
-        "resume_state": "experiments/inpainting_places2_220413_143231/checkpoint/25" 
-        // "resume_state": null // ex: 100, loading .state  and .pth from given epoch and iteration
+        // "resume_state": "experiments/inpainting_places2_220413_143231/checkpoint/25" 
+        "resume_state": null // ex: 100, loading .state  and .pth from given epoch and iteration
     },
 
     "datasets": { // train or test
@@ -18,7 +19,7 @@
             "which_dataset": {  // import designated dataset using arguments 
                 "name": ["data.dataset", "InpaintDataset"], // import Dataset() class / function(not recommend) from data.dataset.py (default is [data.dataset.py])
                 "args":{ // arguments to initialize dataset
-                    "data_root": "/data/jlw/datasets/place365/train.flist",
+                    "data_root": "datasets/place365/train.flist",
                     "data_len": 1e5,
                     "mask_mode": "hybrid"
                 } 
@@ -45,7 +46,7 @@
             "which_dataset": {
                 "name": "InpaintDataset", // import Dataset() class / function(not recommend) from default file
                 "args":{
-                    "data_root": "/data/jlw/datasets/place365/valid.flist",
+                    "data_root": "datasets/place365/valid.flist",
                     "mask_mode": "center"
                 }
             },
@@ -86,7 +87,7 @@
                             1,
                             2,
                             4,
-                            8,
+                            // 8,
                             8
                         ],
                         "attn_res": [

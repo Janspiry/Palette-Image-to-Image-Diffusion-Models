@@ -1,5 +1,6 @@
 # myself
 experiments/*
+datasets/*
 !experiments/clean.sh
 
 # Byte-compiled / optimized / DLL files
