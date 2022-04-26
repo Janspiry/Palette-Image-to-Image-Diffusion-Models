@@ -31,6 +31,7 @@ def main_worker(gpu, ngpus_per_node, opt):
     ''' set logger '''
     phase_logger = InfoLogger(opt)
     phase_writer = VisualWriter(opt, phase_logger)  
+    phase_logger.info('Create the log file in directory {}.\n'.format(opt['name']))
 
     '''set networks and dataset'''
     phase_loader, val_loader = define_dataloader(phase_logger, opt) # val_loader is None if phase is test.
@@ -71,7 +72,7 @@ def main_worker(gpu, ngpus_per_node, opt):
         
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--config', type=str, default='config/inpainting_places2.json', help='JSON file for configuration')
+    parser.add_argument('-c', '--config', type=str, default='config/inpainting_celebahq.json', help='JSON file for configuration')
     parser.add_argument('-p', '--phase', type=str, choices=['train','test'], help='Run train or test', default='train')
     parser.add_argument('-b', '--batch', type=int, default=None, help='Batch size in every gpu')
     parser.add_argument('-gpu', '--gpu_ids', type=str, default=None)

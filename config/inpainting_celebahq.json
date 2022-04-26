@@ -10,7 +10,7 @@
         "tb_logger": "tb_logger", // path of tensorboard logger
         "results": "results",
         "checkpoint": "checkpoint",
-        // "resume_state": "experiments/inpainting_places2_220413_143231/checkpoint/25" 
+        // "resume_state": "experiments/debug_inpainting_celebahq_220426_150122/checkpoint/1" 
         "resume_state": null // ex: 100, loading .state  and .pth from given epoch and iteration
     },
 
@@ -19,7 +19,7 @@
             "which_dataset": {  // import designated dataset using arguments 
                 "name": ["data.dataset", "InpaintDataset"], // import Dataset() class / function(not recommend) from data.dataset.py (default is [data.dataset.py])
                 "args":{ // arguments to initialize dataset
-                    "data_root": "datasets/place365/flist/train.flist",
+                    "data_root": "datasets/celebahq/flist/train.flist",
                     "data_len": -1,
                     "mask_mode": "hybrid"
                 } 
@@ -46,7 +46,7 @@
             "which_dataset": {
                 "name": "InpaintDataset", // import Dataset() class / function(not recommend) from default file
                 "args":{
-                    "data_root": "datasets/place365/flist/test.flist",
+                    "data_root": "datasets/celebahq/flist/test.flist",
                     "mask_mode": "center"
                 }
             },
@@ -108,7 +108,7 @@
                         "train": {
                             "schedule": "linear",
                             "n_timestep": 2000,
-                            // "n_timestep": 5, // debug
+                            // "n_timestep": 10, // debug
                             "linear_start": 1e-6,
                             "linear_end": 0.01
                         },
@@ -127,7 +127,7 @@
         ],
         "which_lr_schedulers": [ // {} represents None, it will be deleted after initialization.
             {}
-            // { "name": "LinearLR", "args": { "start_factor": 0.2, "total_iters": 1e3 }}
+            // { "name": "LinearLR", "args": { "start_factor": 0.2, "total_iters": 1e3 }} // support in newest pytorch vision
         ],
         "which_losses": [ // import designated list of losses without arguments
             "mse_loss" // import mse_loss() function/class from default file (default is [models/losses.py]), equivalent to { "name": "mse_loss", "args":{}}

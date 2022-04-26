@@ -119,8 +119,10 @@ def parse(args):
     ''' update name '''
     if args.debug:
         opt['name'] = 'debug_{}'.format(opt['name'])
-    if opt['finetune_norm']:
+    elif opt['finetune_norm']:
         opt['name'] = 'finetune_{}'.format(opt['name'])
+    else:
+        opt['name'] = '{}_{}'.format(opt['phase'], opt['name'])
 
     ''' set log directory '''
     experiments_root = os.path.join(opt['path']['base_dir'], '{}_{}'.format(opt['name'], get_timestamp()))
