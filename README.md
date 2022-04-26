@@ -8,7 +8,7 @@ This is an unofficial implementation of **Palette: Image-to-Image Diffusion Mode
 
 There are some implement details with paper description, which may be different from the actual `Palette` structure.
 
-- We adapted the U-Net architecture described in  `Guided-Diffusion.
+- We adapted the U-Net architecture described in  `Guided-Diffusion`.
 - We used the attention mechanism in low-resolution features (16×16) like vanilla `DDPM`.
 - We encode the $\gamma$ rather than $t$ in `Palette` and embed it with affine transformation.
 
@@ -16,19 +16,12 @@ There are some implement details with paper description, which may be different 
 
 ### Code
 - [x] Diffusion Model Pipeline
-
 - [x] Train/Test Process
-
 - [x] Save/Load Training State
-
 - [x] Logger/Tensorboard
-
 - [x] DDP Training
-
 - [x] EMA
-
 - [x] Dataset (now just for inpainting)
-
 - [ ] Metrics
 
   
