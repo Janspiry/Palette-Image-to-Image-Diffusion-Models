@@ -149,7 +149,7 @@
     "debug": { // arguments in debug mode, which will replace arguments in train
         "val_epoch": 1,
         "save_checkpoint_epoch": 1,
-        "log_iter": 10,
+        "log_iter": 2,
         "debug_split": 50 // percent or number, change the size of dataloder to debug_split.
     }
 }

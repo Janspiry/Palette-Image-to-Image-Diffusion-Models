@@ -64,11 +64,13 @@ def main_worker(gpu, ngpus_per_node, opt):
     )
 
     phase_logger.info('Begin model {}.'.format(opt['phase']))
-    if opt['phase'] == 'train':
-        model.train()
-    else:
-        model.test()
-    phase_writer.close()
+    try:
+        if opt['phase'] == 'train':
+            model.train()
+        else:
+            model.test()
+    except:
+        phase_writer.close()
         
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

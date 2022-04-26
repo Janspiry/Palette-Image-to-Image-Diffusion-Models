@@ -56,11 +56,12 @@ class VisualWriter():
         log_dir = opt['path']['tb_logger']
         self.result_dir = opt['path']['results']
         enabled = opt['train']['tensorboard']
-        
+        self.rank = opt['global_rank']
+
         self.writer = None
         self.selected_module = ""
 
-        if enabled:
+        if enabled and self.rank==0:
             log_dir = str(log_dir)
 
             # Retrieve vizualization writer.
@@ -112,7 +113,11 @@ class VisualWriter():
         except:
             raise NotImplementedError('You must specify the context of name and result in save_current_results functions of model.')
 
+    def close(self):
+        self.writer.close()
+        print('Close the Tensorboard SummaryWriter.')
 
+        
     def __getattr__(self, name):
         """
         If visualization is configured to use:
@@ -130,9 +135,10 @@ class VisualWriter():
                     add_data(tag, data, self.iter, *args, **kwargs)
             return wrapper
         elif name in self.custom_ftns:
-            customfunc = getattr(self.writer, name)
+            customfunc = getattr(self.writer, name, None)
             def wrapper(*args, **kwargs):
-                customfunc(*args, **kwargs)
+                if customfunc is not None:
+                    customfunc(*args, **kwargs)
             return wrapper
         else:
             # default action for returning methods defined in this class, set_step() for instance.
