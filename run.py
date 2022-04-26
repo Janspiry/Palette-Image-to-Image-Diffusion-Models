@@ -31,7 +31,7 @@ def main_worker(gpu, ngpus_per_node, opt):
     ''' set logger '''
     phase_logger = InfoLogger(opt)
     phase_writer = VisualWriter(opt, phase_logger)  
-    phase_logger.info('Create the log file in directory {}.\n'.format(opt['name']))
+    phase_logger.info('Create the log file in directory {}.\n'.format(opt['path']['experiments_root']))
 
     '''set networks and dataset'''
     phase_loader, val_loader = define_dataloader(phase_logger, opt) # val_loader is None if phase is test.

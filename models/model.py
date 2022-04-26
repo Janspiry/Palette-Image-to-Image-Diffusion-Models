@@ -97,7 +97,6 @@ class Palette(BaseModel):
             loss.backward()
             self.optG.step()
 
-            print('\r'+str(self.batch_size)+' '+str(self.iter), end=' ')
             self.iter += self.batch_size
             self.writer.set_iter(self.epoch, self.iter, phase='train')
             self.train_metrics.update(self.loss_fn.__name__, loss.item())
