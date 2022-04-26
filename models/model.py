@@ -49,9 +49,9 @@ class Palette(BaseModel):
             self.netG.set_new_noise_schedule(phase=self.phase)
 
         ''' can rewrite in inherited class for more informations logging '''
-        self.train_metrics = LogTracker(*[m.__name__ for m in losses], writer=self.writer, phase='train')
-        self.val_metrics = LogTracker(*[m.__name__ for m in losses], *[m.__name__ for m in self.metrics], writer=self.writer, phase='val')
-        self.test_metrics = LogTracker(*[m.__name__ for m in losses], *[m.__name__ for m in self.metrics], writer=self.writer, phase='test')
+        self.train_metrics = LogTracker(*[m.__name__ for m in losses], phase='train')
+        self.val_metrics = LogTracker(*[m.__name__ for m in self.metrics], phase='val')
+        self.test_metrics = LogTracker(*[m.__name__ for m in self.metrics], phase='test')
 
         self.sample_num = sample_num
         self.task = task
@@ -103,6 +103,7 @@ class Palette(BaseModel):
             if self.iter % self.opt['train']['log_iter'] == 0:
                 for key, value in self.train_metrics.result().items():
                     self.logger.info('{:5s}: {}\t'.format(str(key), value))
+                    self.writer.add_scalar(key, value)
                 for key, value in self.get_current_visuals().items():
                     self.writer.add_images(key, value)
             if self.ema_scheduler is not None:
@@ -137,7 +138,10 @@ class Palette(BaseModel):
                 self.writer.set_iter(self.epoch, self.iter, phase='val')
 
                 for met in self.metrics:
-                    self.val_metrics.update(met.__name__, met(self.cond_image, self.output))
+                    key = met.__name__
+                    value = met(self.cond_image, self.output)
+                    self.val_metrics.update(key, value)
+                    self.writer.add_scalar(key, value)
                 for key, value in self.get_current_visuals().items():
                     self.writer.add_images(key, value)
                 self.writer.save_images(self.save_current_results())
@@ -165,7 +169,10 @@ class Palette(BaseModel):
             self.iter += self.batch_size
             self.writer.set_iter(self.epoch, self.iter, phase='test')
             for met in self.metrics:
-                self.test_metrics.update(met.__name__, met(self.cond_image, self.output))
+                key = met.__name__
+                value = met(self.cond_image, self.output)
+                self.val_metrics.update(key, value)
+                self.writer.add_scalar(key, value)
             for key, value in self.get_current_visuals().items():
                 self.writer.add_images(key, value)
             self.writer.save_images(self.save_current_results())

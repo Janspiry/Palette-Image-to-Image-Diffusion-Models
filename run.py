@@ -68,7 +68,7 @@ def main_worker(gpu, ngpus_per_node, opt):
         model.train()
     else:
         model.test()
-        
+    phase_writer.close()
         
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

@@ -89,7 +89,7 @@ class VisualWriter():
             'add_text', 'add_histogram', 'add_pr_curve', 'add_embedding'
         }
         self.tag_mode_exceptions = {'add_histogram', 'add_embedding'}
-        self.custom_ftns = {'save_images'}
+        self.custom_ftns = {'close'}
         self.timer = datetime.now()
 
     def set_iter(self, epoch, iter, phase='train'):
@@ -122,13 +122,17 @@ class VisualWriter():
         """
         if name in self.tb_writer_ftns:
             add_data = getattr(self.writer, name, None)
-
             def wrapper(tag, data, *args, **kwargs):
                 if add_data is not None:
                     # add phase(train/valid) tag
                     if name not in self.tag_mode_exceptions:
                         tag = '{}/{}'.format(self.phase, tag)
                     add_data(tag, data, self.iter, *args, **kwargs)
+            return wrapper
+        elif name in self.custom_ftns:
+            customfunc = getattr(self.writer, name)
+            def wrapper(*args, **kwargs):
+                customfunc(*args, **kwargs)
             return wrapper
         else:
             # default action for returning methods defined in this class, set_step() for instance.
@@ -143,8 +147,7 @@ class LogTracker:
     """
     record training numerical indicators.
     """
-    def __init__(self, *keys, writer=None, phase='train'):
-        self.writer = writer
+    def __init__(self, *keys, phase='train'):
         self.phase = phase
         self._data = pd.DataFrame(index=keys, columns=['total', 'counts', 'average'])
         self.reset()
@@ -154,8 +157,6 @@ class LogTracker:
             self._data[col].values[:] = 0
 
     def update(self, key, value, n=1):
-        if self.writer is not None:
-            self.writer.add_scalar('{}/{}'.format(self.phase, key), value)
         self._data.total[key] += value * n
         self._data.counts[key] += n
         self._data.average[key] = self._data.total[key] / self._data.counts[key]
