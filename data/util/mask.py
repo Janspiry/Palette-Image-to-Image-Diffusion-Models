@@ -9,7 +9,7 @@ from PIL import Image, ImageDraw
 def random_cropping_bbox(img_shape=(256,256), mask_mode='onedirection'):
     h, w = img_shape
     if mask_mode == 'onedirection':
-        _type = np.random(0, 4)
+        _type = np.random.randint(0, 4)
         if _type == 0:
             top, left, height, width = 0, 0, h, w//2
         elif _type == 1:

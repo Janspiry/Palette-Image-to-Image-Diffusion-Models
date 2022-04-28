@@ -1,5 +1,5 @@
 {
-    "name": "inpainting_celebahq", // experiments name
+    "name": "uncropping_places2", // experiments name
     "gpu_ids": [0], // gpu ids list, default is single 0
     "seed" : -1, // random seed, seed <0 represents randomization not used 
     "finetune_norm": false, // find the parameters to optimize
@@ -29,7 +29,7 @@
             "dataloader":{
                 "validation_split": 2, // percent or number 
                 "args":{ // arguments to initialize train_dataloader
-                    "batch_size": 3, // batch size in each gpu
+                    "batch_size": 1, // batch size in each gpu
                     "num_workers": 4,
                     "shuffle": true,
                     "pin_memory": true,
