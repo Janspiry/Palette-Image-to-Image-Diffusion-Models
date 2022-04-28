@@ -19,11 +19,17 @@ def random_cropping_bbox(img_shape=(256,256), mask_mode='onedirection'):
         elif _type == 3:
             top, left, height, width = 0, w//2, h, w//2
     else:
-        target_area = h*w//2
+        target_area = (h*w)//2
         width = np.random.randint(target_area//h, w)
         height = target_area//width
-        top = np.random.randint(0, h-height)
-        left = np.random.randint(0, w-width)
+        if h==height:
+            top = 0
+        else:
+            top = np.random.randint(0, h-height)
+        if w==width:
+            left = 0
+        else:
+            left = np.random.randint(0, w-width)
     return (top, left, height, width)
 
 def random_bbox(img_shape=(256,256), max_bbox_shape=(128, 128), max_bbox_delta=40, min_margin=20):

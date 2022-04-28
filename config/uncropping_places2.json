@@ -20,7 +20,7 @@
                 "name": ["data.dataset", "UncroppingDataset"], // import Dataset() class / function(not recommend) from data.dataset.py (default is [data.dataset.py])
                 "args":{ // arguments to initialize dataset
                     "data_root": "datasets/place365/flist/train.flist",
-                    "data_len": -1,
+                    "data_len": 3e5,
                     "mask_config": {
                         "mask_mode": "hybrid" // onedirection | fourdirection | hybrid | manual
                     }
@@ -29,7 +29,7 @@
             "dataloader":{
                 "validation_split": 2, // percent or number 
                 "args":{ // arguments to initialize train_dataloader
-                    "batch_size": 1, // batch size in each gpu
+                    "batch_size": 3, // batch size in each gpu
                     "num_workers": 4,
                     "shuffle": true,
                     "pin_memory": true,
@@ -70,15 +70,10 @@
             "name": ["models.model", "Palette"], // import Model() class / function(not recommend) from models.model.py (default is [models.model.py])
             "args": {
                 "sample_num": 8, // process of each image
-                "task": "uncropping",
-                "ema_scheduler": {
-                    "ema_start": 1e3,
-                    "ema_iter": 1e3,
-                    "ema_decay": 0.9999
-                }
-                // "ema_scheduler": { // debug
-                //     "ema_start": 0,
-                //     "ema_iter": 10,
+                "task": "uncropping"
+                // "ema_scheduler": {
+                //     "ema_start": 1e3,
+                //     "ema_iter": 1e3,
                 //     "ema_decay": 0.9999
                 // }
             }
@@ -145,8 +140,8 @@
     "train": { // arguments for basic training
         "n_epoch": 1e8, // max epochs, not limited now
         "n_iter": 1e8, // max interations
-        "val_epoch": 5, // valdation every specified number of epochs
-        "save_checkpoint_epoch": 10,
+        "val_epoch": 1, // valdation every specified number of epochs
+        "save_checkpoint_epoch": 1,
         "log_iter": 1e4, // log every specified number of iterations
         "tensorboard" : true // tensorboardX enable
     },
