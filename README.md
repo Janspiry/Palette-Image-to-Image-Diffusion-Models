@@ -43,7 +43,7 @@ I try to finish following tasks in order:
 
 Current results with 30K iterations🌟.
 
-| ![Process_26190](\misc\image\Process_26190.jpg) | ![Process_25531](misc\image\Process_25531.jpg) |
+| ![Process_26190](misc//image//Process_26190.jpg) | ![Process_25531](misc//image//Process_25531.jpg) |
 | ----------------------------------------------- | ---------------------------------------------- |
 
 
