@@ -6,14 +6,17 @@
 
 This is an unofficial implementation of **Palette: Image-to-Image Diffusion Models** by **Pytorch**, and it is mainly inherited from its super-resolution version [Image-Super-Resolution-via-Iterative-Refinement](https://github.com/Janspiry/Image-Super-Resolution-via-Iterative-Refinement). The code template is from my another seed project: [distributed-pytorch-template](https://github.com/Janspiry/distributed-pytorch-template).
 
-There are some implementation details with paper descriptions, which may be different from the actual `Palette` structure.
+There are some implementation details with paper descriptions:
 
-- We adapted the U-Net architecture used in  `Guided-Diffusion`, which can give a substantial boost to sample quality.
-- We used the attention mechanism in low-resolution features (16×16) like vanilla `DDPM` due to the limit of resources.
+- We adapted the U-Net architecture used in  `Guided-Diffusion`, which give a substantial boost to sample quality.
+- We used the attention mechanism in low-resolution features (16×16) like vanilla `DDPM`.
 - We encode the $\gamma$ rather than $t$ in `Palette` and embed it with affine transformation.
-- As described in `Palette`, we fix the variance $Σ_\theta(x_t, t)$ to a constant during the inference.
+- We fix the variance $Σ_\theta(x_t, t)$ to a constant during the inference as described in `Palette`.
 
 ## Status
+
+Due to the complete work needing a lot of GPU support, I just build the complete training pipeline and then choose some tasks or alternative datasets to evaluate.
+
 ### Code
 - [x] Diffusion Model Pipeline
 - [x] Train/Test Process
@@ -21,12 +24,12 @@ There are some implementation details with paper descriptions, which may be diff
 - [x] Logger/Tensorboard
 - [x] Multiple GPU Training (DDP)
 - [x] EMA
-- [x] Dataset (now just for inpainting)
+- [x] Dataset (now for inpainting, uncropping)
 - [ ] Metrics
 
-
 ### Task
-I try to finish following tasks in order, and the first two tasks are running. 
+
+I try to finish following tasks in order:
 - [ ] Inpainting on CelebaHQ🔥
 - [ ] Inpainting on Places2 with 128×128 center mask🔥
 - [ ] Uncropping on Places2
@@ -40,9 +43,9 @@ I try to finish following tasks in order, and the first two tasks are running.
 
 Current results with 30K iterations🌟.
 
-| ![Process_26190](https://gitee.com/Janspiry/markdown-image/raw/master/assets/Process_26190.jpg) | ![Process_13361](https://gitee.com/Janspiry/markdown-image/raw/master/assets/Process_13361.jpg) |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| ![Process_14401](https://gitee.com/Janspiry/markdown-image/raw/master/assets/Process_14401.jpg) | ![Process_25531](https://gitee.com/Janspiry/markdown-image/raw/master/assets/Process_25531.jpg) |
+| ![Process_26190](\misc\image\Process_26190.jpg) | ![Process_25531](misc\image\Process_25531.jpg) |
+| ----------------------------------------------- | ---------------------------------------------- |
+
 
 
 

@@ -21,7 +21,9 @@
                 "args":{ // arguments to initialize dataset
                     "data_root": "datasets/place365/flist/train.flist",
                     "data_len": -1,
-                    "mask_mode": "hybrid"
+                    "mask_config": {
+                        "mask_mode": "hybrid"
+                    }
                 } 
             },
             "dataloader":{
@@ -47,7 +49,9 @@
                 "name": "InpaintDataset", // import Dataset() class / function(not recommend) from default file
                 "args":{
                     "data_root": "datasets/place365/flist/test.flist",
-                    "mask_mode": "center"
+                    "mask_config": {
+                        "mask_mode": "center"
+                    }
                 }
             },
             "dataloader":{

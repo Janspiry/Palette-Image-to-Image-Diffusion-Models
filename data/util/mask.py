@@ -6,6 +6,26 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 
+def random_cropping_bbox(img_shape=(256,256), mask_mode='onedirection'):
+    h, w = img_shape
+    if mask_mode == 'onedirection':
+        _type = np.random(0, 4)
+        if _type == 0:
+            top, left, height, width = 0, 0, h, w//2
+        elif _type == 1:
+            top, left, height, width = 0, 0, h//2, w
+        elif _type == 2:
+            top, left, height, width = h//2, 0, h//2, w
+        elif _type == 3:
+            top, left, height, width = 0, w//2, h, w//2
+    else:
+        target_area = h*w//2
+        width = np.random.randint(target_area//h, w)
+        height = target_area//width
+        top = np.random.randint(0, h-height)
+        left = np.random.randint(0, w-width)
+    return (top, left, height, width)
+
 def random_bbox(img_shape=(256,256), max_bbox_shape=(128, 128), max_bbox_delta=40, min_margin=20):
     """Generate a random bbox for the mask on a given image.
 

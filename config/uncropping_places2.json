@@ -10,19 +10,19 @@
         "tb_logger": "tb_logger", // path of tensorboard logger
         "results": "results",
         "checkpoint": "checkpoint",
-        // "resume_state": "experiments/debug_inpainting_celebahq_220426_150122/checkpoint/1" 
+        // "resume_state": "experiments/inpainting_places2_220413_143231/checkpoint/25" 
         "resume_state": null // ex: 100, loading .state  and .pth from given epoch and iteration
     },
 
     "datasets": { // train or test
         "train": { 
             "which_dataset": {  // import designated dataset using arguments 
-                "name": ["data.dataset", "InpaintDataset"], // import Dataset() class / function(not recommend) from data.dataset.py (default is [data.dataset.py])
+                "name": ["data.dataset", "UncroppingDataset"], // import Dataset() class / function(not recommend) from data.dataset.py (default is [data.dataset.py])
                 "args":{ // arguments to initialize dataset
-                    "data_root": "datasets/celebahq/flist/train.flist",
+                    "data_root": "datasets/place365/flist/train.flist",
                     "data_len": -1,
                     "mask_config": {
-                        "mask_mode": "hybrid"
+                        "mask_mode": "hybrid" // onedirection | fourdirection | hybrid | manual
                     }
                 } 
             },
@@ -46,11 +46,12 @@
         },
         "test": { 
             "which_dataset": {
-                "name": "InpaintDataset", // import Dataset() class / function(not recommend) from default file
+                "name": "UncroppingDataset", // import Dataset() class / function(not recommend) from default file
                 "args":{
-                    "data_root": "datasets/celebahq/flist/test.flist",
+                    "data_root": "datasets/place365/flist/test.flist",
                     "mask_config": {
-                        "mask_mode": "center"
+                        "mask_mode": "onedirection",
+                        "shape": []
                     }
                 }
             },
@@ -69,7 +70,7 @@
             "name": ["models.model", "Palette"], // import Model() class / function(not recommend) from models.model.py (default is [models.model.py])
             "args": {
                 "sample_num": 8, // process of each image
-                "task": "inpainting",
+                "task": "uncropping",
                 "ema_scheduler": {
                     "ema_start": 1e3,
                     "ema_iter": 1e3,
@@ -112,7 +113,7 @@
                         "train": {
                             "schedule": "linear",
                             "n_timestep": 2000,
-                            // "n_timestep": 10, // debug
+                            // "n_timestep": 5, // debug
                             "linear_start": 1e-6,
                             "linear_end": 0.01
                         },
@@ -131,7 +132,7 @@
         ],
         "which_lr_schedulers": [ // {} represents None, it will be deleted after initialization.
             {}
-            // { "name": "LinearLR", "args": { "start_factor": 0.2, "total_iters": 1e3 }} // support in newest pytorch vision
+            // { "name": "LinearLR", "args": { "start_factor": 0.2, "total_iters": 1e3 }}
         ],
         "which_losses": [ // import designated list of losses without arguments
             "mse_loss" // import mse_loss() function/class from default file (default is [models/losses.py]), equivalent to { "name": "mse_loss", "args":{}}
@@ -153,7 +154,7 @@
     "debug": { // arguments in debug mode, which will replace arguments in train
         "val_epoch": 1,
         "save_checkpoint_epoch": 1,
-        "log_iter": 2,
+        "log_iter": 10,
         "debug_split": 50 // percent or number, change the size of dataloder to debug_split.
     }
 }
