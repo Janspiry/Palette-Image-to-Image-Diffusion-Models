@@ -1,4 +1,3 @@
-import re
 import torch
 import tqdm
 from core.base_model import BaseModel
@@ -63,12 +62,16 @@ class Palette(BaseModel):
         self.mask = self.set_device(data.get('mask'))
         self.path = data['path']
     
-    def get_current_visuals(self):
+    def get_current_visuals(self, phase='train'):
         dict = {
-            'gt_image': (self.gt_image.detach()[:2].float().cpu()+1)/2,
-            'cond_image': (self.cond_image.detach()[:2].float().cpu()+1)/2,
-            'mask': self.mask.detach()[:2].float().cpu()
+            'gt_image': (self.gt_image.detach()[:].float().cpu()+1)/2,
+            'cond_image': (self.cond_image.detach()[:].float().cpu()+1)/2,
+            'mask': self.mask.detach()[:].float().cpu()
         }
+        if phase != 'train':
+            dict.update({
+                'output': (self.output.detach()[:].float().cpu()+1)/2
+            })
         return dict
 
     def save_current_results(self):
@@ -79,10 +82,10 @@ class Palette(BaseModel):
             ret_result.append(self.gt_image[idx].detach().float().cpu())
 
             ret_path.append('Process_{}'.format(self.path[idx]))
-            ret_result.append(self.output[idx::self.batch_size].detach().float().cpu())
+            ret_result.append(self.visuals[idx::self.batch_size].detach().float().cpu())
             
             ret_path.append('Out_{}'.format(self.path[idx]))
-            ret_result.append(self.output[idx-self.batch_size].detach().float().cpu())
+            ret_result.append(self.visuals[idx-self.batch_size].detach().float().cpu())
 
         self.results_dict = self.results_dict._replace(name=ret_path, result=ret_result)
         return self.results_dict._asdict()
@@ -123,16 +126,16 @@ class Palette(BaseModel):
                 self.set_input(val_data)
                 if self.opt['distributed']:
                     if self.task in ['inpainting','uncropping']:
-                        self.output = self.netG.module.restoration(self.cond_image, y_t=self.cond_image, 
+                        self.output, self.visuals = self.netG.module.restoration(self.cond_image, y_t=self.cond_image, 
                             y_0=self.gt_image, mask=self.mask, sample_num=self.sample_num)
                     else:
-                        self.output = self.netG.module.restoration(self.cond_image, sample_num=self.sample_num)
+                        self.output, self.visuals = self.netG.module.restoration(self.cond_image, sample_num=self.sample_num)
                 else:
                     if self.task in ['inpainting','uncropping']:
-                        self.output = self.netG.restoration(self.cond_image, y_t=self.cond_image, 
+                        self.output, self.visuals = self.netG.restoration(self.cond_image, y_t=self.cond_image, 
                             y_0=self.gt_image, mask=self.mask, sample_num=self.sample_num)
                     else:
-                        self.output = self.netG.restoration(self.cond_image, sample_num=self.sample_num)
+                        self.output, self.visuals = self.netG.restoration(self.cond_image, sample_num=self.sample_num)
                     
                 self.iter += self.batch_size
                 self.writer.set_iter(self.epoch, self.iter, phase='val')
@@ -142,7 +145,7 @@ class Palette(BaseModel):
                     value = met(self.cond_image, self.output)
                     self.val_metrics.update(key, value)
                     self.writer.add_scalar(key, value)
-                for key, value in self.get_current_visuals().items():
+                for key, value in self.get_current_visuals(phase='val').items():
                     self.writer.add_images(key, value)
                 self.writer.save_images(self.save_current_results())
 
@@ -155,16 +158,16 @@ class Palette(BaseModel):
             self.set_input(phase_data)
             if self.opt['distributed']:
                 if self.task in ['inpainting','uncropping']:
-                    self.output = self.netG.module.restoration(self.cond_image, y_t=self.cond_image, 
+                    self.output, self.visuals = self.netG.module.restoration(self.cond_image, y_t=self.cond_image, 
                         y_0=self.gt_image, mask=self.mask, sample_num=self.sample_num)
                 else:
-                    self.output = self.netG.module.restoration(self.cond_image, sample_num=self.sample_num)
+                    self.output, self.visuals = self.netG.module.restoration(self.cond_image, sample_num=self.sample_num)
             else:
                 if self.task in ['inpainting','uncropping']:
-                    self.output = self.netG.restoration(self.cond_image, y_t=self.cond_image, 
+                    self.output, self.visuals = self.netG.restoration(self.cond_image, y_t=self.cond_image, 
                         y_0=self.gt_image, mask=self.mask, sample_num=self.sample_num)
                 else:
-                    self.output = self.netG.restoration(self.cond_image, sample_num=self.sample_num)
+                    self.output, self.visuals = self.netG.restoration(self.cond_image, sample_num=self.sample_num)
                     
             self.iter += self.batch_size
             self.writer.set_iter(self.epoch, self.iter, phase='test')
@@ -173,7 +176,7 @@ class Palette(BaseModel):
                 value = met(self.cond_image, self.output)
                 self.val_metrics.update(key, value)
                 self.writer.add_scalar(key, value)
-            for key, value in self.get_current_visuals().items():
+            for key, value in self.get_current_visuals(phase='val').items():
                 self.writer.add_images(key, value)
             self.writer.save_images(self.save_current_results())
 
