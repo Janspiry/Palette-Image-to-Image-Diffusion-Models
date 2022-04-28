@@ -24,12 +24,10 @@ There are some implementation details with paper descriptions, which may be diff
 - [x] Dataset (now just for inpainting)
 - [ ] Metrics
 
-  
-
 
 ### Task
 I try to finish following tasks in order, and the first two tasks are running. 
-- [ ] Inpainting on CelebaHQ with 128×128 center mask🔥
+- [ ] Inpainting on CelebaHQ🔥
 - [ ] Inpainting on Places2 with 128×128 center mask🔥
 - [ ] Uncropping on Places2
 - [ ] Colorization on ImageNet val set 
@@ -38,7 +36,15 @@ I try to finish following tasks in order, and the first two tasks are running.
 
 ### Visuals
 
-Coming soon 🌟
+#### Celeba-HQ
+
+Current results with 30K iterations🌟.
+
+| ![Process_26190](https://gitee.com/Janspiry/markdown-image/raw/master/assets/Process_26190.jpg) | ![Process_13361](https://gitee.com/Janspiry/markdown-image/raw/master/assets/Process_13361.jpg) |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| ![Process_14401](https://gitee.com/Janspiry/markdown-image/raw/master/assets/Process_14401.jpg) | ![Process_25531](https://gitee.com/Janspiry/markdown-image/raw/master/assets/Process_25531.jpg) |
+
+
 
 ### Metrics
 
