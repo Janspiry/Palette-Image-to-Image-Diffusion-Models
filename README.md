@@ -15,8 +15,6 @@ There are some implementation details with paper descriptions:
 
 ## Status
 
-Due to the complete work needing a lot of GPU support, I just build the complete training pipeline and then choose some tasks or alternative datasets to evaluate.
-
 ### Code
 - [x] Diffusion Model Pipeline
 - [x] Train/Test Process
@@ -30,9 +28,9 @@ Due to the complete work needing a lot of GPU support, I just build the complete
 ### Task
 
 I try to finish following tasks in order:
-- [x] Inpainting on CelebaHQ🔥
+- [x] Inpainting on [CelebaHQ](https://drive.google.com/drive/folders/1CjZAajyf-jIknskoTQ4CGvVkAigkhNWA?usp=sharing)🚀 (available)
 - [ ] Inpainting on Places2 with 128×128 center mask🔥
-- [ ] Uncropping on Places2
+- [ ] Uncropping on Places2🔥 
 - [ ] Colorization on ImageNet val set 
 
 ## Results
@@ -41,15 +39,10 @@ I try to finish following tasks in order:
 
 #### Celeba-HQ
 
-Results with 200 epoches and 100K iterations, and we show the first 100 pictures without picking and choosing in 
+Results with 200 epochs and 930K iterations, and the first 100 samples in [centering mask](https://drive.google.com/drive/folders/10zyHZtYV5vCht2MGNCF8WzpZJT2ae2RS?usp=sharing) and [irregular mask](https://drive.google.com/drive/folders/1vmSI-R9J2yQZY1cVkSSZlTYil2DprzvY?usp=sharing). 
 
-
-
-
-
-| ![Process_26190](misc//image//Process_26190.jpg) | ![Process_25531](misc//image//center_mask.jpg) |
-| ----------------------------------------------- | ---------------------------------------------- |
-
+| ![Process_02323](misc//image//Process_02323.jpg) |    ![Process_02323](misc//image//Process_26190.jpg)  |
+| ------------------------------------------------ | ---- |
 
 
 
@@ -67,6 +60,12 @@ pip install -r requirement.txt
 ```
 
 ### Pre-trained Model
+
+| Dataset   | Task       | Iterations | URL                                                          |
+| --------- | ---------- | ---------- | ------------------------------------------------------------ |
+| Celeba-HQ | Inpainting | 930K       | [Goggle Drive](https://drive.google.com/drive/folders/13YZ2UAmGJ-b7DICr-FDAPM7gctreJEoH?usp=sharing) |
+
+
 
 ### Data Prepare
 
@@ -91,7 +90,8 @@ We use the default division of these datasets for training and evaluation. After
 More choices about **dataloader** and **validation split** also can be found in `datasets`  part of configure file.
 
 ### Training/Resume Training
-1. Set `resume_state` of configure file to the directory of previous saved model. Take the following as an example, this directory contains training states and saved model:
+1. Download the checkpoints from given links.
+1. Set `resume_state` of configure file to the directory of previous checkpoint. Take the following as an example, this directory contains training states and saved model:
 
 ```yaml
 "path": { //set every part file path
