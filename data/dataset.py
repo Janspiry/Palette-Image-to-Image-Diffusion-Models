@@ -3,7 +3,6 @@ from torchvision import transforms
 from PIL import Image
 import os
 import torch
-import torchvision.transforms.functional as F
 import numpy as np
 
 from .util.mask import (bbox2mask, brush_stroke_mask, get_irregular_mask, random_bbox, random_cropping_bbox)

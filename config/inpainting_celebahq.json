@@ -71,8 +71,8 @@
                 "sample_num": 8, // process of each image
                 "task": "inpainting",
                 "ema_scheduler": {
-                    "ema_start": 1e3,
-                    "ema_iter": 1e3,
+                    "ema_start": 1,
+                    "ema_iter": 1,
                     "ema_decay": 0.9999
                 }
                 // "ema_scheduler": { // debug

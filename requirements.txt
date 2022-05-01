@@ -6,3 +6,4 @@ tqdm
 tensorboardX>=1.14
 scipy 
 opencv-python
+cleanfid

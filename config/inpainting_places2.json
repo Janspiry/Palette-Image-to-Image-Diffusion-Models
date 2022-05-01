@@ -1,5 +1,5 @@
 {
-    "name": "inpainting_celebahq", // experiments name
+    "name": "inpainting_places2", // experiments name
     "gpu_ids": [0], // gpu ids list, default is single 0
     "seed" : -1, // random seed, seed <0 represents randomization not used 
     "finetune_norm": false, // find the parameters to optimize
@@ -71,8 +71,8 @@
                 "sample_num": 8, // process of each image
                 "task": "inpainting",
                 "ema_scheduler": {
-                    "ema_start": 1e3,
-                    "ema_iter": 1e3,
+                    "ema_start": 1,
+                    "ema_iter": 1,
                     "ema_decay": 0.9999
                 }
                 // "ema_scheduler": { // debug
@@ -144,8 +144,8 @@
     "train": { // arguments for basic training
         "n_epoch": 1e8, // max epochs, not limited now
         "n_iter": 1e8, // max interations
-        "val_epoch": 5, // valdation every specified number of epochs
-        "save_checkpoint_epoch": 10,
+        "val_epoch": 1, // valdation every specified number of epochs
+        "save_checkpoint_epoch": 1,
         "log_iter": 1e4, // log every specified number of iterations
         "tensorboard" : true // tensorboardX enable
     },

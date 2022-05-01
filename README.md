@@ -24,8 +24,8 @@ Due to the complete work needing a lot of GPU support, I just build the complete
 - [x] Logger/Tensorboard
 - [x] Multiple GPU Training (DDP)
 - [x] EMA
-- [x] Dataset (now for inpainting, uncropping)
-- [ ] Metrics
+- [ ] Dataset (now for inpainting, uncropping)
+- [ ] Metrics (now for FID, IS)
 
 ### Task
 
@@ -109,13 +109,22 @@ python run.py -p train -c config/inpainting_celebahq.json
 
 We test the U-Net backbone used in `SR3` and `Guided Diffusion`,  and `Guided Diffusion` one have a more robust performance in our current experiments.  More choices about **backbone**, **loss** and **scheduler** can be found in `which_networks`  part of configure file.
 
-### Test/Evaluation
+### Test
 
 1. Modify the configure file to point to your data following the steps in **Data Prepare** part.
 2. Set your model path following the steps in **Resume Training** part.
 3. Run the script:
 ```python
 python run.py -p test -c config/inpainting_celebahq.json
+```
+
+### Evaluation
+1. Create two folders saving ground truth images and sample images, and their file names need to correspond to each other.
+
+2. Run the script:
+
+```python
+python eval.py -s [ground image path] -d [sample image path]
 ```
 
 

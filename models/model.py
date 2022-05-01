@@ -110,8 +110,7 @@ class Palette(BaseModel):
                 for key, value in self.get_current_visuals().items():
                     self.writer.add_images(key, value)
             if self.ema_scheduler is not None:
-                if self.iter % self.ema_scheduler['ema_iter'] == 0 and self.iter > self.ema_scheduler['ema_start']:
-                    self.logger.info('Update the EMA  model at the iter {:.0f}'.format(self.iter))
+                if self.iter > self.ema_scheduler['ema_start'] and self.iter % self.ema_scheduler['ema_iter'] == 0:
                     self.EMA.update_model_average(self.netG_EMA, self.netG)
 
         for scheduler in self.schedulers:

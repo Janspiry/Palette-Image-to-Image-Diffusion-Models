@@ -7,7 +7,6 @@ import torch
 import torch.nn as nn
 
 import core.util as Util
-from core.logger import LogTracker
 CustomResult = collections.namedtuple('CustomResult', 'name result')
 
 class BaseModel():

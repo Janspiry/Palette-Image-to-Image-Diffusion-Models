@@ -134,12 +134,6 @@ class VisualWriter():
                         tag = '{}/{}'.format(self.phase, tag)
                     add_data(tag, data, self.iter, *args, **kwargs)
             return wrapper
-        elif name in self.custom_ftns:
-            customfunc = getattr(self.writer, name, None)
-            def wrapper(*args, **kwargs):
-                if customfunc is not None:
-                    customfunc(*args, **kwargs)
-            return wrapper
         else:
             # default action for returning methods defined in this class, set_step() for instance.
             try:

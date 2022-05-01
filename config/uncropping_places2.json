@@ -20,7 +20,7 @@
                 "name": ["data.dataset", "UncroppingDataset"], // import Dataset() class / function(not recommend) from data.dataset.py (default is [data.dataset.py])
                 "args":{ // arguments to initialize dataset
                     "data_root": "datasets/place365/flist/train.flist",
-                    "data_len": 3e5,
+                    "data_len": -1,
                     "mask_config": {
                         "mask_mode": "hybrid" // onedirection | fourdirection | hybrid | manual
                     }
@@ -70,12 +70,12 @@
             "name": ["models.model", "Palette"], // import Model() class / function(not recommend) from models.model.py (default is [models.model.py])
             "args": {
                 "sample_num": 8, // process of each image
-                "task": "uncropping"
-                // "ema_scheduler": {
-                //     "ema_start": 1e3,
-                //     "ema_iter": 1e3,
-                //     "ema_decay": 0.9999
-                // }
+                "task": "uncropping",
+                "ema_scheduler": {
+                    "ema_start": 1,
+                    "ema_iter": 1,
+                    "ema_decay": 0.9999
+                }
             }
         }, 
         "which_networks": [ // import designated list of networks using arguments

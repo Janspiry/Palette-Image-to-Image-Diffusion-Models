@@ -32,25 +32,17 @@ class Network(BaseNetwork):
         gammas = np.cumprod(alphas, axis=0)
         gammas_prev = np.append(1., gammas[:-1])
 
-
         # calculations for diffusion q(x_t | x_{t-1}) and others
-        self.register_buffer('gammas',
-                             to_torch(gammas))
-        self.register_buffer('sqrt_recip_gammas',
-                             to_torch(np.sqrt(1. / gammas)))
-        self.register_buffer('sqrt_recipm1_gammas',
-                             to_torch(np.sqrt(1. / gammas - 1)))
+        self.register_buffer('gammas', to_torch(gammas))
+        self.register_buffer('sqrt_recip_gammas', to_torch(np.sqrt(1. / gammas)))
+        self.register_buffer('sqrt_recipm1_gammas', to_torch(np.sqrt(1. / gammas - 1)))
 
         # calculations for posterior q(x_{t-1} | x_t, x_0)
-        posterior_variance = betas * \
-            (1. - gammas_prev) / (1. - gammas)
+        posterior_variance = betas * (1. - gammas_prev) / (1. - gammas)
         # below: log calculation clipped because the posterior variance is 0 at the beginning of the diffusion chain
-        self.register_buffer('posterior_log_variance_clipped', to_torch(
-            np.log(np.maximum(posterior_variance, 1e-20))))
-        self.register_buffer('posterior_mean_coef1', to_torch(
-            betas * np.sqrt(gammas_prev) / (1. - gammas)))
-        self.register_buffer('posterior_mean_coef2', to_torch(
-            (1. - gammas_prev) * np.sqrt(alphas) / (1. - gammas)))
+        self.register_buffer('posterior_log_variance_clipped', to_torch(np.log(np.maximum(posterior_variance, 1e-20))))
+        self.register_buffer('posterior_mean_coef1', to_torch(betas * np.sqrt(gammas_prev) / (1. - gammas)))
+        self.register_buffer('posterior_mean_coef2', to_torch((1. - gammas_prev) * np.sqrt(alphas) / (1. - gammas)))
 
     def predict_start_from_noise(self, y_t, t, noise):
         return (

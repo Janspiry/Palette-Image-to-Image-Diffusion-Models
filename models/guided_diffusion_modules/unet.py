@@ -354,7 +354,7 @@ class UNet(nn.Module):
         channel_mults=(1, 2, 4, 8),
         conv_resample=True,
         use_checkpoint=False,
-        use_fp16=True,
+        use_fp16=False,
         num_heads=1,
         num_head_channels=-1,
         num_heads_upsample=-1,
