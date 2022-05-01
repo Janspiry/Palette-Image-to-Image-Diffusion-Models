@@ -54,10 +54,12 @@ class InpaintDataset(data.Dataset):
         path = self.imgs[index]
         img = self.tfs(self.loader(path))
         mask = self.get_mask()
-        mask_img = img*(1. - mask) + mask*torch.randn_like(img)
+        cond_image = img*(1. - mask) + mask*torch.randn_like(img)
+        mask_img = img*(1. - mask) + mask
 
         ret['gt_image'] = img
-        ret['cond_image'] = mask_img
+        ret['cond_image'] = cond_image
+        ret['mask_image'] = mask_img
         ret['mask'] = mask
         ret['path'] = path.rsplit("/")[-1]
         return ret
@@ -110,10 +112,12 @@ class UncroppingDataset(data.Dataset):
         path = self.imgs[index]
         img = self.tfs(self.loader(path))
         mask = self.get_mask()
-        mask_img = img*(1. - mask) + mask*torch.randn_like(img)
+        cond_image = img*(1. - mask) + mask*torch.randn_like(img)
+        mask_img = img*(1. - mask) + mask
 
         ret['gt_image'] = img
-        ret['cond_image'] = mask_img
+        ret['cond_image'] = cond_image
+        ret['mask_image'] = mask_img
         ret['mask'] = mask
         ret['path'] = path.rsplit("/")[-1]
         return ret

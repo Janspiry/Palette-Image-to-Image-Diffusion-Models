@@ -60,14 +60,19 @@ class Palette(BaseModel):
         self.cond_image = self.set_device(data.get('cond_image'))
         self.gt_image = self.set_device(data.get('gt_image'))
         self.mask = self.set_device(data.get('mask'))
+        self.mask_image = data.get('mask_image')
         self.path = data['path']
     
     def get_current_visuals(self, phase='train'):
         dict = {
             'gt_image': (self.gt_image.detach()[:].float().cpu()+1)/2,
             'cond_image': (self.cond_image.detach()[:].float().cpu()+1)/2,
-            'mask': self.mask.detach()[:].float().cpu()
         }
+        if self.task in ['inpainting','uncropping']:
+            dict.update({
+                'mask': self.mask.detach()[:].float().cpu(),
+                'mask_image': (self.mask_image+1)/2,
+            })
         if phase != 'train':
             dict.update({
                 'output': (self.output.detach()[:].float().cpu()+1)/2
@@ -78,7 +83,7 @@ class Palette(BaseModel):
         ret_path = []
         ret_result = []
         for idx in range(self.batch_size):
-            ret_path.append('In_{}'.format(self.path[idx]))
+            ret_path.append('GT_{}'.format(self.path[idx]))
             ret_result.append(self.gt_image[idx].detach().float().cpu())
 
             ret_path.append('Process_{}'.format(self.path[idx]))
@@ -86,6 +91,10 @@ class Palette(BaseModel):
             
             ret_path.append('Out_{}'.format(self.path[idx]))
             ret_result.append(self.visuals[idx-self.batch_size].detach().float().cpu())
+        
+        if self.task in ['inpainting','uncropping']:
+            ret_path.extend(['Mask_{}'.format(name) for name in self.path])
+            ret_result.extend(self.mask_image)
 
         self.results_dict = self.results_dict._replace(name=ret_path, result=ret_result)
         return self.results_dict._asdict()
@@ -175,7 +184,7 @@ class Palette(BaseModel):
                 value = met(self.cond_image, self.output)
                 self.val_metrics.update(key, value)
                 self.writer.add_scalar(key, value)
-            for key, value in self.get_current_visuals(phase='val').items():
+            for key, value in self.get_current_visuals(phase='test').items():
                 self.writer.add_images(key, value)
             self.writer.save_images(self.save_current_results())
 

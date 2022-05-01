@@ -30,7 +30,7 @@ Due to the complete work needing a lot of GPU support, I just build the complete
 ### Task
 
 I try to finish following tasks in order:
-- [ ] Inpainting on CelebaHQ🔥
+- [x] Inpainting on CelebaHQ🔥
 - [ ] Inpainting on Places2 with 128×128 center mask🔥
 - [ ] Uncropping on Places2
 - [ ] Colorization on ImageNet val set 
@@ -41,9 +41,13 @@ I try to finish following tasks in order:
 
 #### Celeba-HQ
 
-Current results with 30K iterations🌟.
+Results with 200 epoches and 100K iterations, and we show the first 100 pictures without picking and choosing in 
 
-| ![Process_26190](misc//image//Process_26190.jpg) | ![Process_25531](misc//image//Process_25531.jpg) |
+
+
+
+
+| ![Process_26190](misc//image//Process_26190.jpg) | ![Process_25531](misc//image//center_mask.jpg) |
 | ----------------------------------------------- | ---------------------------------------------- |
 
 
