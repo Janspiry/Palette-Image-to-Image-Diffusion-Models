@@ -22,8 +22,8 @@ There are some implementation details with paper descriptions:
 - [x] Logger/Tensorboard
 - [x] Multiple GPU Training (DDP)
 - [x] EMA
+- [x] Metrics (now for FID, IS)
 - [ ] Dataset (now for inpainting, uncropping)
-- [ ] Metrics (now for FID, IS)
 
 ### Task
 
@@ -48,10 +48,12 @@ Results with 200 epochs and 930K iterations, and the first 100 samples in [cente
 
 ### Metrics
 
-| Tasks/Metrics        | FID(-) | IS(+) | CA(+) | PD(-) |
-| -------------------- | ----------- | -------- | ---- | ---- |
-
-
+| Tasks        | Dataset | EMA | FID(-) | IS(+) |
+| -------------------- | ----------- | -------- | ---- | -------------------- |
+| Inpainting with centering mask | Celeba-HQ | False | 5.7873 | 3.0705 |
+| Inpainting with irregular mask | Celeba-HQ | False | 5.4026 | 3.1221 |
+| Inpainting with centering mask | Places2 | True |  |  |
+| Uncropping | Places2 | True |  |  |
 
 ## Usage
 ### Environment

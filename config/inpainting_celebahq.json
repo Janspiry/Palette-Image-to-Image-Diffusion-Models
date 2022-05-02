@@ -10,7 +10,7 @@
         "tb_logger": "tb_logger", // path of tensorboard logger
         "results": "results",
         "checkpoint": "checkpoint",
-        // "resume_state": "experiments/debug_inpainting_celebahq_220426_150122/checkpoint/1" 
+        // "resume_state": "experiments/train_inpainting_celebahq_220426_233652/checkpoint/200" 
         "resume_state": null // ex: 100, loading .state  and .pth from given epoch and iteration
     },
 
