@@ -65,7 +65,7 @@ pip install -r requirement.txt
 
 | Dataset   | Task       | Iterations | URL                                                          |
 | --------- | ---------- | ---------- | ------------------------------------------------------------ |
-| Celeba-HQ | Inpainting | 930K       | [Goggle Drive](https://drive.google.com/drive/folders/13YZ2UAmGJ-b7DICr-FDAPM7gctreJEoH?usp=sharing) |
+| Celeba-HQ | Inpainting | 930K       | [Google Drive](https://drive.google.com/drive/folders/13YZ2UAmGJ-b7DICr-FDAPM7gctreJEoH?usp=sharing) |
 
 
 
