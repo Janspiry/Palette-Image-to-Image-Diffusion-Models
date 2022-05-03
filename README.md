@@ -29,7 +29,7 @@ There are some implementation details with paper descriptions:
 
 I try to finish following tasks in order:
 - [x] Inpainting on [CelebaHQ](https://drive.google.com/drive/folders/1CjZAajyf-jIknskoTQ4CGvVkAigkhNWA?usp=sharing)🚀 (available)
-- [ ] Inpainting on Places2 with 128×128 center mask🔥
+- [ ] Inpainting on Places2 with 128×128 centering mask🔥
 - [ ] Uncropping on Places2🔥 
 - [ ] Colorization on ImageNet val set 
 
@@ -43,6 +43,15 @@ Results with 200 epochs and 930K iterations, and the first 100 samples in [cente
 
 | ![Process_02323](misc//image//Process_02323.jpg) |    ![Process_02323](misc//image//Process_26190.jpg)  |
 | ------------------------------------------------ | ---- |
+
+#### Places2 with 128×128 centering mask
+
+Current results with 8 epochs and 330K iterations.
+
+| ![Process_Places365_test_00124460](misc//image//Process_Places365_test_00124460.jpg) |    ![Process_Places365_test_00278428](misc//image//Process_Places365_test_00278428.jpg)  |
+| ------------------------------------------------ | ---- |
+
+#### Uncropping on Places2
 
 
 
