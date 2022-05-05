@@ -85,7 +85,9 @@ We get most of them from Kaggle, which may be slightly different from official  
 - [Places2 Official](http://places2.csail.mit.edu/download.html) | [Places2 Kaggle](https://www.kaggle.com/datasets/nickj26/places2-mit-dataset?resource=download)
 - [ImageNet Official](https://www.image-net.org/download.php)
 
-We use the default division of these datasets for training and evaluation. After you prepared own data, you need to modify the corresponding configure file to point to your data. Take the following as an example:
+We use the default division of these datasets for training and evaluation. The file lists we use can be found in [Celeba-HQ](https://drive.google.com/drive/folders/1-ym2Mi2jVKdWmWYKJ_L2TWXjUQh8z7H-?usp=sharing), [Places2](https://drive.google.com/drive/folders/11Qj2MtRfiD7LbKEveYwOLaiX62lm_2ww?usp=sharing).
+
+After you prepared own data, you need to modify the corresponding configure file to point to your data. Take the following as an example:
 
 ```yaml
 "which_dataset": {  // import designated dataset using arguments 
