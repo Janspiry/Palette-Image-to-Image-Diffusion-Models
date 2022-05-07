@@ -29,7 +29,7 @@ There are some implementation details with paper descriptions:
 
 I try to finish following tasks in order:
 - [x] Inpainting on [CelebaHQ](https://drive.google.com/drive/folders/1CjZAajyf-jIknskoTQ4CGvVkAigkhNWA?usp=sharing)🚀 (available)
-- [ ] Inpainting on Places2 with 128×128 center mask🔥
+- [ ] Inpainting on Places2 with 128×128 centering mask🔥
 - [ ] Uncropping on Places2🔥 
 - [ ] Colorization on ImageNet val set 
 
@@ -43,6 +43,15 @@ Results with 200 epochs and 930K iterations, and the first 100 samples in [cente
 
 | ![Process_02323](misc//image//Process_02323.jpg) |    ![Process_02323](misc//image//Process_26190.jpg)  |
 | ------------------------------------------------ | ---- |
+
+#### Places2 with 128×128 centering mask
+
+Current results with 8 epochs and 330K iterations.
+
+| ![Process_Places365_test_00124460](misc//image//Process_Places365_test_00124460.jpg) |    ![Process_Places365_test_00278428](misc//image//Process_Places365_test_00278428.jpg)  |
+| ------------------------------------------------ | ---- |
+
+#### Uncropping on Places2
 
 
 
@@ -76,7 +85,9 @@ We get most of them from Kaggle, which may be slightly different from official  
 - [Places2 Official](http://places2.csail.mit.edu/download.html) | [Places2 Kaggle](https://www.kaggle.com/datasets/nickj26/places2-mit-dataset?resource=download)
 - [ImageNet Official](https://www.image-net.org/download.php)
 
-We use the default division of these datasets for training and evaluation. After you prepared own data, you need to modify the corresponding configure file to point to your data. Take the following as an example:
+We use the default division of these datasets for training and evaluation. The file lists we use can be found in [Celeba-HQ](https://drive.google.com/drive/folders/1-ym2Mi2jVKdWmWYKJ_L2TWXjUQh8z7H-?usp=sharing), [Places2](https://drive.google.com/drive/folders/11Qj2MtRfiD7LbKEveYwOLaiX62lm_2ww?usp=sharing).
+
+After you prepared own data, you need to modify the corresponding configure file to point to your data. Take the following as an example:
 
 ```yaml
 "which_dataset": {  // import designated dataset using arguments 
