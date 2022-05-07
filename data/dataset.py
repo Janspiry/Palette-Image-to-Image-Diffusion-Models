@@ -4,6 +4,7 @@ from PIL import Image
 import os
 import torch
 import numpy as np
+import cv2
 
 from .util.mask import (bbox2mask, brush_stroke_mask, get_irregular_mask, random_bbox, random_cropping_bbox)
 
@@ -89,7 +90,6 @@ class InpaintDataset(data.Dataset):
         return torch.from_numpy(mask).permute(2,0,1)
 
 
-
 class UncroppingDataset(data.Dataset):
     def __init__(self, data_root, mask_config={}, data_len=-1, image_size=[256, 256], loader=pil_loader):
         imgs = make_dataset(data_root)
@@ -141,4 +141,61 @@ class UncroppingDataset(data.Dataset):
             raise NotImplementedError(
                 f'Mask mode {self.mask_mode} has not been implemented.')
         return torch.from_numpy(mask).permute(2,0,1)
+
+
+def convert_abl(ab, l):
+    """ convert AB and L to RGB """
+    l = np.expand_dims(l, axis=3)
+    lab = np.concatenate([l, ab], axis=3)
+    if len(lab.shape)==4:
+        image_color, image_l = [], []        
+        for _color, _l in zip(lab, l):
+            image_color.append(cv2.cvtColor(_color.astype('uint8'), cv2.COLOR_LAB2RGB))
+            image_l.append(cv2.cvtColor(_l.astype('uint8'), cv2.COLOR_GRAY2RGB))
+        image_color = np.array(image_color)
+        image_l = np.array(image_l)
+    else:
+        image_color = cv2.cvtColor(lab.astype('uint8'), cv2.COLOR_LAB2RGB)
+        image_l = cv2.cvtColor(l.astype('uint8'), cv2.COLOR_GRAY2RGB)
+    return image_color, image_l
+
+class ColorizationDataset(data.Dataset):
+    def __init__(self, data_root, data_flist, data_len=-1, image_size=[224, 224], loader=pil_loader):
+
+        ab1 = np.load(os.path.join(data_root,"ab/ab", "ab1.npy"))
+        ab2 = np.load(os.path.join(data_root, "ab/ab", "ab2.npy"))
+        ab3 = np.load(os.path.join(data_root,"ab/ab", "ab3.npy"))
+        ab = np.concatenate([ab1, ab2, ab3], axis=0)
+        l = np.load(os.path.join(data_root,"l/gray_scale.npy"))
+        self.imgs, self.gray = convert_abl(ab, l)
+
+        flist = make_dataset(data_flist)
+        if data_len > 0:
+            self.flist = flist[:int(data_len)]
+        else:
+            self.flist = flist
+        self.tfs = transforms.Compose([
+                transforms.ToPILImage(),
+                transforms.Resize((image_size[0], image_size[1])),
+                transforms.ToTensor(),
+                transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5,0.5, 0.5])
+        ])
+        self.loader = loader
+        self.image_size = image_size
+
+    def __getitem__(self, index):
+        ret = {}
+        idx = int(self.flist[index])
+
+        img = self.tfs(self.imgs[idx])
+        cond_image = self.tfs(self.gray[idx])
+
+        ret['gt_image'] = img
+        ret['cond_image'] = cond_image
+        ret['path'] = str(idx).zfill(5)+'.png'
+        return ret
+
+    def __len__(self):
+        return len(self.flist)
+
 

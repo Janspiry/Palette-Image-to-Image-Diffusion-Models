@@ -1,5 +1,5 @@
 {
-    "name": "inpainting_places2", // experiments name
+    "name": "colorization_mirflickr25k", // experiments name
     "gpu_ids": [0], // gpu ids list, default is single 0
     "seed" : -1, // random seed, seed <0 represents randomization not used 
     "finetune_norm": false, // find the parameters to optimize
@@ -10,20 +10,18 @@
         "tb_logger": "tb_logger", // path of tensorboard logger
         "results": "results",
         "checkpoint": "checkpoint",
-        "resume_state": "experiments/train_inpainting_places2_220429_160230/checkpoint/8" 
-        // "resume_state": null // ex: 100, loading .state  and .pth from given epoch and iteration
+        // "resume_state": "experiments/inpainting_places2_220413_143231/checkpoint/25" 
+        "resume_state": null // ex: 100, loading .state  and .pth from given epoch and iteration
     },
 
     "datasets": { // train or test
         "train": { 
             "which_dataset": {  // import designated dataset using arguments 
-                "name": ["data.dataset", "InpaintDataset"], // import Dataset() class / function(not recommend) from data.dataset.py (default is [data.dataset.py])
+                "name": ["data.dataset", "ColorizationDataset"], // import Dataset() class / function(not recommend) from data.dataset.py (default is [data.dataset.py])
                 "args":{ // arguments to initialize dataset
-                    "data_root": "datasets/place365/flist/train.flist",
-                    "data_len": -1,
-                    "mask_config": {
-                        "mask_mode": "hybrid"
-                    }
+                    "data_root": "datasets/mirflickr25k",
+                    "data_flist": "datasets/mirflickr25k/flist/train.flist",
+                    "data_len": -1
                 } 
             },
             "dataloader":{
@@ -46,12 +44,10 @@
         },
         "test": { 
             "which_dataset": {
-                "name": "InpaintDataset", // import Dataset() class / function(not recommend) from default file
+                "name": "ColorizationDataset", // import Dataset() class / function(not recommend) from default file
                 "args":{
-                    "data_root": "datasets/place365/flist/test.flist",
-                    "mask_config": {
-                        "mask_mode": "center"
-                    }
+                    "data_root": "datasets/mirflickr25k",
+                    "data_flist": "datasets/mirflickr25k/flist/test.flist"
                 }
             },
             "dataloader":{
@@ -69,17 +65,12 @@
             "name": ["models.model", "Palette"], // import Model() class / function(not recommend) from models.model.py (default is [models.model.py])
             "args": {
                 "sample_num": 8, // process of each image
-                "task": "inpainting",
+                "task": "colorization",
                 "ema_scheduler": {
                     "ema_start": 1,
                     "ema_iter": 1,
                     "ema_decay": 0.9999
                 }
-                // "ema_scheduler": { // debug
-                //     "ema_start": 0,
-                //     "ema_iter": 10,
-                //     "ema_decay": 0.9999
-                // }
             }
         }, 
         "which_networks": [ // import designated list of networks using arguments
@@ -106,7 +97,7 @@
                         "num_head_channels": 32,
                         "res_blocks": 2,
                         "dropout": 0.2,
-                        "image_size": 256
+                        "image_size": 224
                     },
                     "beta_schedule": {
                         "train": {
@@ -144,8 +135,8 @@
     "train": { // arguments for basic training
         "n_epoch": 1e8, // max epochs, not limited now
         "n_iter": 1e8, // max interations
-        "val_epoch": 1, // valdation every specified number of epochs
-        "save_checkpoint_epoch": 1,
+        "val_epoch": 5, // valdation every specified number of epochs
+        "save_checkpoint_epoch": 10,
         "log_iter": 1e4, // log every specified number of iterations
         "tensorboard" : true // tensorboardX enable
     },

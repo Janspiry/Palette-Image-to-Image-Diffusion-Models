@@ -54,6 +54,8 @@ def set_seed(seed, gl_seed=0):
 
 def set_gpu(args, distributed=False, rank=0):
 	""" set parameter to gpu or ddp """
+	if args is None:
+		return None
 	if distributed and isinstance(args, torch.nn.Module):
 		return DDP(args.cuda(), device_ids=[rank], output_device=rank, broadcast_buffers=True, find_unused_parameters=True)
 	else:
