@@ -19,7 +19,7 @@
             "which_dataset": {  // import designated dataset using arguments 
                 "name": ["data.dataset", "ColorizationDataset"], // import Dataset() class / function(not recommend) from data.dataset.py (default is [data.dataset.py])
                 "args":{ // arguments to initialize dataset
-                    "data_root": "datasets/mirflickr25k",
+                    "data_root": "datasets/mirflickr25k/images",
                     "data_flist": "datasets/mirflickr25k/flist/train.flist",
                     "data_len": -1
                 } 
@@ -27,7 +27,7 @@
             "dataloader":{
                 "validation_split": 2, // percent or number 
                 "args":{ // arguments to initialize train_dataloader
-                    "batch_size": 3, // batch size in each gpu
+                    "batch_size": 4, // batch size in each gpu
                     "num_workers": 4,
                     "shuffle": true,
                     "pin_memory": true,
@@ -46,7 +46,7 @@
             "which_dataset": {
                 "name": "ColorizationDataset", // import Dataset() class / function(not recommend) from default file
                 "args":{
-                    "data_root": "datasets/mirflickr25k",
+                    "data_root": "datasets/mirflickr25k/images",
                     "data_flist": "datasets/mirflickr25k/flist/test.flist"
                 }
             },
