@@ -23,7 +23,7 @@ There are some implementation details with paper descriptions:
 - [x] Multiple GPU Training (DDP)
 - [x] EMA
 - [x] Metrics (now for FID, IS)
-- [ ] Dataset (now for inpainting, uncropping, colorization)
+- [x] Dataset (now for inpainting, uncropping, colorization)
 
 ### Task
 
@@ -34,6 +34,8 @@ I try to finish following tasks in order:
 - [ ] Colorization on ImageNet val set 
 
 ## Results
+
+Due to the lack of computational resources, we reduced the model parameters, while it does not fully converge. It leaves a lot of room for optimization. However, we can feel the excellent performance of this method through the stage results.
 
 ### Visuals
 
@@ -48,9 +50,9 @@ Results with 200 epochs and 930K iterations, and the first 100 samples in [cente
 
 Results with 16 epochs and 660K iterations, and the several **picked** samples in [centering mask](https://drive.google.com/drive/folders/1XusKO0_M6GUfPG-FOlID0Xcp0SiexKNe?usp=sharing).
 
-| ![Mask_Places365_test_00209019.jpg](misc//image//Mask_Places365_test_00209019.jpg) | ![Mask_Places365_test_00143399.jpg](misc//image//Mask_Places365_test_00143399.jpg) | ![Mask_Places365_test_00263905.jpg](misc//image//Mask_Places365_test_00263905.jpg) |
-| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| ![Out_Places365_test_00209019](misc//image//Out_Places365_test_00209019.jpg) | ![Out_Places365_test_00143399.jpg](misc//image//Out_Places365_test_00143399.jpg) | ![Out_Places365_test_00263905.jpg](misc//image//Out_Places365_test_00263905.jpg) |
+| ![Mask_Places365_test_00209019.jpg](misc//image//Mask_Places365_test_00209019.jpg) | ![Mask_Places365_test_00143399.jpg](misc//image//Mask_Places365_test_00143399.jpg) | ![Mask_Places365_test_00263905.jpg](misc//image//Mask_Places365_test_00263905.jpg) |  ![Mask_Places365_test_00144085.jpg](misc//image//Mask_Places365_test_00144085.jpg)    |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ---- |
+| ![Out_Places365_test_00209019](misc//image//Out_Places365_test_00209019.jpg) | ![Out_Places365_test_00143399.jpg](misc//image//Out_Places365_test_00143399.jpg) | ![Out_Places365_test_00263905.jpg](misc//image//Out_Places365_test_00263905.jpg) | ![Out_Places365_test_00144085.jpg](misc//image//Out_Places365_test_00144085.jpg)    |
 
 #### Uncropping on Places2
 
