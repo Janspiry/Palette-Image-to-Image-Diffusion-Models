@@ -73,7 +73,7 @@ Results with 8 epochs and 330K iterations, and the several  **picked** samples i
 ## Usage
 ### Environment
 ```python
-pip install -r requirement.txt
+pip install -r requirements.txt
 ```
 
 ### Pre-trained Model
