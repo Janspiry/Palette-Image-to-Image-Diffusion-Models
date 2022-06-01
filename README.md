@@ -23,17 +23,19 @@ There are some implementation details with paper descriptions:
 - [x] Multiple GPU Training (DDP)
 - [x] EMA
 - [x] Metrics (now for FID, IS)
-- [ ] Dataset (now for inpainting, uncropping)
+- [x] Dataset (now for inpainting, uncropping, colorization)
 
 ### Task
 
 I try to finish following tasks in order:
 - [x] Inpainting on [CelebaHQ](https://drive.google.com/drive/folders/1CjZAajyf-jIknskoTQ4CGvVkAigkhNWA?usp=sharing)🚀 (available)
-- [ ] Inpainting on Places2 with 128×128 centering mask🔥
+- [x] Inpainting on [Places2 with 128×128 centering mask](https://drive.google.com/drive/folders/1fLyFtrStfEtyrqwI0N_Xb_3idsf0gz0M?usp=sharing)🚀 (available)
 - [ ] Uncropping on Places2🔥 
 - [ ] Colorization on ImageNet val set 
 
 ## Results
+
+Due to the lack of computational resources, we reduced the model parameters, while it does not fully converge. It leaves a lot of room for optimization. However, we can feel the excellent performance of this method through the stage results.
 
 ### Visuals
 
@@ -46,13 +48,17 @@ Results with 200 epochs and 930K iterations, and the first 100 samples in [cente
 
 #### Places2 with 128×128 centering mask
 
-Current results with 8 epochs and 330K iterations.
+Results with 16 epochs and 660K iterations, and the several **picked** samples in [centering mask](https://drive.google.com/drive/folders/1XusKO0_M6GUfPG-FOlID0Xcp0SiexKNe?usp=sharing).
 
-| ![Process_Places365_test_00124460](misc//image//Process_Places365_test_00124460.jpg) |    ![Process_Places365_test_00278428](misc//image//Process_Places365_test_00278428.jpg)  |
-| ------------------------------------------------ | ---- |
+| ![Mask_Places365_test_00209019.jpg](misc//image//Mask_Places365_test_00209019.jpg) | ![Mask_Places365_test_00143399.jpg](misc//image//Mask_Places365_test_00143399.jpg) | ![Mask_Places365_test_00263905.jpg](misc//image//Mask_Places365_test_00263905.jpg) |  ![Mask_Places365_test_00144085.jpg](misc//image//Mask_Places365_test_00144085.jpg)    |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ---- |
+| ![Out_Places365_test_00209019](misc//image//Out_Places365_test_00209019.jpg) | ![Out_Places365_test_00143399.jpg](misc//image//Out_Places365_test_00143399.jpg) | ![Out_Places365_test_00263905.jpg](misc//image//Out_Places365_test_00263905.jpg) | ![Out_Places365_test_00144085.jpg](misc//image//Out_Places365_test_00144085.jpg)    |
 
 #### Uncropping on Places2
 
+Results with 8 epochs and 330K iterations, and the several  **picked** samples in [uncropping](https://drive.google.com/drive/folders/1tC3B8ayaadhXAJrOCTrw15R8t84REPWJ?usp=sharing).
+| ![Process_Places365_test_00309553](misc//image//Process_Places365_test_00309553.jpg) |    ![Process_Places365_test_00042384](misc//image//Process_Places365_test_00042384.jpg)  |
+| ------------------------------------------------ | ---- |
 
 
 ### Metrics
@@ -61,13 +67,13 @@ Current results with 8 epochs and 330K iterations.
 | -------------------- | ----------- | -------- | ---- | -------------------- |
 | Inpainting with centering mask | Celeba-HQ | False | 5.7873 | 3.0705 |
 | Inpainting with irregular mask | Celeba-HQ | False | 5.4026 | 3.1221 |
-| Inpainting with centering mask | Places2 | True |  |  |
+| Inpainting with centering mask | Places2 | False |  |        |
 | Uncropping | Places2 | True |  |  |
 
 ## Usage
 ### Environment
 ```python
-pip install -r requirement.txt
+pip install -r requirements.txt
 ```
 
 ### Pre-trained Model
@@ -75,6 +81,7 @@ pip install -r requirement.txt
 | Dataset   | Task       | Iterations | URL                                                          |
 | --------- | ---------- | ---------- | ------------------------------------------------------------ |
 | Celeba-HQ | Inpainting | 930K       | [Google Drive](https://drive.google.com/drive/folders/13YZ2UAmGJ-b7DICr-FDAPM7gctreJEoH?usp=sharing) |
+| Places2   | Inpainting | 660K       | [Google Drive](https://drive.google.com/drive/folders/1Vz_HC0LcpV6yMLOd-SXyoaqJHtxyPBxZ?usp=sharing) |
 
 
 
