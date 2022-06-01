@@ -8,7 +8,7 @@ from core.logger import VisualWriter, InfoLogger
 import core.praser as Praser
 import core.util as Util
 from data import define_dataloader
-from models import create_model, define_network, define_loss, define_metric, define_optimizer, define_scheduler
+from models import create_model, define_network, define_loss, define_metric
 
 def main_worker(gpu, ngpus_per_node, opt):
     """  threads running on each GPU """
@@ -41,22 +41,11 @@ def main_worker(gpu, ngpus_per_node, opt):
     metrics = [define_metric(phase_logger, item_opt) for item_opt in opt['model']['which_metrics']]
     losses = [define_loss(phase_logger, item_opt) for item_opt in opt['model']['which_losses']]
 
-    trian_params = [list(filter(lambda p: p.requires_grad, network.parameters())) for network in networks]
-    optimizers = [define_optimizer(trian_params[_idx], phase_logger, item_opt) 
-        for _idx, item_opt in enumerate(opt['model']['which_optimizers'])]
-    optimizers = [optimizer for optimizer in optimizers if optimizer is not None]
-    
-    lr_schedulers = [define_scheduler(optimizers[_idx], phase_logger, item_opt)
-        for _idx, item_opt in enumerate(opt['model']['which_lr_schedulers'])]
-    lr_schedulers = [lr_scheduler for lr_scheduler in lr_schedulers if lr_scheduler is not None]
-    
     model = create_model(
         opt = opt,
         networks = networks,
         phase_loader = phase_loader,
         val_loader = val_loader,
-        optimizers = optimizers, 
-        lr_schedulers = lr_schedulers,
         losses = losses,
         metrics = metrics,
         logger = phase_logger,

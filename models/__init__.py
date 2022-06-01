@@ -1,4 +1,3 @@
-import torch
 from core.praser import init_obj
 
 def create_model(**cfg_model):
@@ -28,8 +27,3 @@ def define_loss(logger, loss_opt):
 def define_metric(logger, metric_opt):
     return init_obj(metric_opt, logger, default_file_name='models.metric', init_type='Metric')
 
-def define_optimizer(networks, logger, optimizer_opt):
-    return init_obj(optimizer_opt, logger, networks, given_module=torch.optim, init_type='Optimizer')
-
-def define_scheduler(optimizers, logger, scheduler_opt):
-    return init_obj(scheduler_opt, logger, optimizers, given_module=torch.optim.lr_scheduler, init_type='Scheduler')

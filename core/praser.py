@@ -19,7 +19,7 @@ def init_obj(opt, logger, *args, default_file_name='default file', given_module=
     ''' default format is dict with name key '''
     if isinstance(opt, str):
         opt = {'name': opt}
-        logger.info('Config is a str, converts to a dict {}'.format(opt))
+        logger.warning('Config is a str, converts to a dict {}'.format(opt))
 
     name = opt['name']
     ''' name can be list, indicates the file and class name of function '''

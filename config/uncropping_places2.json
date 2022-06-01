@@ -75,7 +75,10 @@
                     "ema_start": 1,
                     "ema_iter": 1,
                     "ema_decay": 0.9999
-                }
+                },
+                "optimizers": [
+                    { "lr": 5e-5, "weight_decay": 0}
+                ]
             }
         }, 
         "which_networks": [ // import designated list of networks using arguments

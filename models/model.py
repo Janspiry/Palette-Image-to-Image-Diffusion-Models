@@ -17,7 +17,7 @@ class EMA():
         return old * self.beta + (1 - self.beta) * new
 
 class Palette(BaseModel):
-    def __init__(self, networks, optimizers, lr_schedulers, losses, sample_num, task, ema_scheduler=None, **kwargs):
+    def __init__(self, networks, losses, sample_num, task, optimizers, ema_scheduler=None, **kwargs):
         ''' must to init BaseModel with kwargs '''
         super(Palette, self).__init__(**kwargs)
 
@@ -30,16 +30,17 @@ class Palette(BaseModel):
             self.EMA = EMA(beta=self.ema_scheduler['ema_decay'])
         else:
             self.ema_scheduler = None
-        ''' ddp '''
+        
+        ''' networks can be a list, and must convert by self.set_device function if using multiple GPU. '''
         self.netG = self.set_device(self.netG, distributed=self.opt['distributed'])
         if self.ema_scheduler is not None:
             self.netG_EMA = self.set_device(self.netG_EMA, distributed=self.opt['distributed'])
-        
-        self.schedulers = lr_schedulers
-        self.optG = optimizers[0]
+        self.load_networks()
 
-        ''' networks can be a list, and must convert by self.set_device function if using multiple GPU. '''
-        self.load_everything()
+        self.optG = torch.optim.Adam(list(filter(lambda p: p.requires_grad, self.netG.parameters())), **optimizers[0])
+        self.optimizers.append(self.optG)
+        self.resume_training() 
+
         if self.opt['distributed']:
             self.netG.module.set_loss(self.loss_fn)
             self.netG.module.set_new_noise_schedule(phase=self.phase)
@@ -188,7 +189,7 @@ class Palette(BaseModel):
                 self.writer.add_images(key, value)
             self.writer.save_images(self.save_current_results())
 
-    def load_everything(self):
+    def load_networks(self):
         """ save pretrained model and training state, which only do on GPU 0. """
         if self.opt['distributed']:
             netG_label = self.netG.module.__class__.__name__
@@ -197,7 +198,6 @@ class Palette(BaseModel):
         self.load_network(network=self.netG, network_label=netG_label, strict=False)
         if self.ema_scheduler is not None:
             self.load_network(network=self.netG_EMA, network_label=netG_label+'_ema', strict=False)
-        self.resume_training([self.optG], self.schedulers) 
 
     def save_everything(self):
         """ load pretrained model and training state, optimizers and schedulers must be a list. """
@@ -208,4 +208,4 @@ class Palette(BaseModel):
         self.save_network(network=self.netG, network_label=netG_label)
         if self.ema_scheduler is not None:
             self.save_network(network=self.netG_EMA, network_label=netG_label+'_ema')
-        self.save_training_state([self.optG], self.schedulers)
+        self.save_training_state()

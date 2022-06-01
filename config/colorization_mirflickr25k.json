@@ -117,13 +117,6 @@
                 }
             }
         ],
-        "which_optimizers": [ // len(networks) == len(optimizers) == len(lr_schedulers), it will be deleted after initialization if not used.
-            { "name": "Adam", "args":{ "lr": 5e-5, "weight_decay": 0}}
-        ],
-        "which_lr_schedulers": [ // {} represents None, it will be deleted after initialization.
-            {}
-            // { "name": "LinearLR", "args": { "start_factor": 0.2, "total_iters": 1e3 }}
-        ],
         "which_losses": [ // import designated list of losses without arguments
             "mse_loss" // import mse_loss() function/class from default file (default is [models/losses.py]), equivalent to { "name": "mse_loss", "args":{}}
         ],

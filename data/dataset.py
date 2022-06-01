@@ -4,7 +4,6 @@ from PIL import Image
 import os
 import torch
 import numpy as np
-import cv2
 
 from .util.mask import (bbox2mask, brush_stroke_mask, get_irregular_mask, random_bbox, random_cropping_bbox)
 
@@ -62,7 +61,7 @@ class InpaintDataset(data.Dataset):
         ret['cond_image'] = cond_image
         ret['mask_image'] = mask_img
         ret['mask'] = mask
-        ret['path'] = path.rsplit("/")[-1]
+        ret['path'] = path.rsplit("/")[-1].rsplit("\\")[-1]
         return ret
 
     def __len__(self):
@@ -119,7 +118,7 @@ class UncroppingDataset(data.Dataset):
         ret['cond_image'] = cond_image
         ret['mask_image'] = mask_img
         ret['mask'] = mask
-        ret['path'] = path.rsplit("/")[-1]
+        ret['path'] = path.rsplit("/")[-1].rsplit("\\")[-1]
         return ret
 
     def __len__(self):
