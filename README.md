@@ -29,7 +29,7 @@ There are some implementation details with paper descriptions:
 ### Task
 
 I try to finish following tasks in order:
-- [x] Inpainting on [CelebaHQ](https://drive.google.com/drive/folders/1CjZAajyf-jIknskoTQ4CGvVkAigkhNWA?usp=sharing)🚀 ([Colab](https://colab.research.google.com/drive/1wfcd6QKkN2AqZDGFKZLyGKAoI5xcXUgO#scrollTo=8VFpuekybeQK))
+- [x] Inpainting on [CelebaHQ](https://drive.google.com/drive/folders/1CjZAajyf-jIknskoTQ4CGvVkAigkhNWA?usp=sharing)🚀 ([Google Colab](https://colab.research.google.com/drive/1wfcd6QKkN2AqZDGFKZLyGKAoI5xcXUgO#scrollTo=8VFpuekybeQK))
 - [x] Inpainting on [Places2 with 128×128 centering mask](https://drive.google.com/drive/folders/1fLyFtrStfEtyrqwI0N_Xb_3idsf0gz0M?usp=sharing)🚀
 
 The follow-up experiment is uncertain, due to lack of time and GPU resources:
@@ -80,12 +80,12 @@ pip install -r requirements.txt
 
 ### Pre-trained Model
 
-| Dataset   | Task       | Iterations | GPUs$\times$Days$\times$Bs* | URL                                                          |
-| --------- | ---------- | ---------- | --------------------------- | ------------------------------------------------------------ |
-| Celeba-HQ | Inpainting | 930K       | 2$\times$5$\times$3         | [Google Drive](https://drive.google.com/drive/folders/13YZ2UAmGJ-b7DICr-FDAPM7gctreJEoH?usp=sharing) |
-| Places2   | Inpainting | 660K       | 4$\times$8$\times$10        | [Google Drive](https://drive.google.com/drive/folders/1Vz_HC0LcpV6yMLOd-SXyoaqJHtxyPBxZ?usp=sharing) |
+| Dataset   | Task       | Iterations | GPUs×Days×Bs | URL                                                          |
+| --------- | ---------- | ---------- | ------------ | ------------------------------------------------------------ |
+| Celeba-HQ | Inpainting | 930K       | 2×5×3        | [Google Drive](https://drive.google.com/drive/folders/13YZ2UAmGJ-b7DICr-FDAPM7gctreJEoH?usp=sharing) |
+| Places2   | Inpainting | 660K       | 4×8×10       | [Google Drive](https://drive.google.com/drive/folders/1Vz_HC0LcpV6yMLOd-SXyoaqJHtxyPBxZ?usp=sharing) |
 
-[^*]: Bs indicates sample size per gpu.
+**Bs** indicates sample size per gpu.
 
 
 
