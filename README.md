@@ -24,18 +24,22 @@ There are some implementation details with paper descriptions:
 - [x] EMA
 - [x] Metrics (now for FID, IS)
 - [x] Dataset (now for inpainting, uncropping, colorization)
+- [x] Google colab script 🌟(now for inpainting)
 
 ### Task
 
 I try to finish following tasks in order:
-- [x] Inpainting on [CelebaHQ](https://drive.google.com/drive/folders/1CjZAajyf-jIknskoTQ4CGvVkAigkhNWA?usp=sharing)🚀 (available)
-- [x] Inpainting on [Places2 with 128×128 centering mask](https://drive.google.com/drive/folders/1fLyFtrStfEtyrqwI0N_Xb_3idsf0gz0M?usp=sharing)🚀 (available)
-- [ ] Uncropping on Places2🔥 
+- [x] Inpainting on [CelebaHQ](https://drive.google.com/drive/folders/1CjZAajyf-jIknskoTQ4CGvVkAigkhNWA?usp=sharing)🚀 ([Colab](https://colab.research.google.com/drive/1wfcd6QKkN2AqZDGFKZLyGKAoI5xcXUgO#scrollTo=8VFpuekybeQK))
+- [x] Inpainting on [Places2 with 128×128 centering mask](https://drive.google.com/drive/folders/1fLyFtrStfEtyrqwI0N_Xb_3idsf0gz0M?usp=sharing)🚀
+
+The follow-up experiment is uncertain, due to lack of time and GPU resources:
+
+- [ ] Uncropping on Places2
 - [ ] Colorization on ImageNet val set 
 
 ## Results
 
-Due to the lack of computational resources, we reduced the model parameters, while it does not fully converge. It leaves a lot of room for optimization. However, we can feel the excellent performance of this method through the stage results.
+The DDPM model requires significant computational resources, and we have only built a few example models to validate the ideas in this paper.
 
 ### Visuals
 
@@ -67,8 +71,6 @@ Results with 8 epochs and 330K iterations, and the several  **picked** samples i
 | -------------------- | ----------- | -------- | ---- | -------------------- |
 | Inpainting with centering mask | Celeba-HQ | False | 5.7873 | 3.0705 |
 | Inpainting with irregular mask | Celeba-HQ | False | 5.4026 | 3.1221 |
-| Inpainting with centering mask | Places2 | False |  |        |
-| Uncropping | Places2 | True |  |  |
 
 ## Usage
 ### Environment
@@ -78,10 +80,12 @@ pip install -r requirements.txt
 
 ### Pre-trained Model
 
-| Dataset   | Task       | Iterations | URL                                                          |
-| --------- | ---------- | ---------- | ------------------------------------------------------------ |
-| Celeba-HQ | Inpainting | 930K       | [Google Drive](https://drive.google.com/drive/folders/13YZ2UAmGJ-b7DICr-FDAPM7gctreJEoH?usp=sharing) |
-| Places2   | Inpainting | 660K       | [Google Drive](https://drive.google.com/drive/folders/1Vz_HC0LcpV6yMLOd-SXyoaqJHtxyPBxZ?usp=sharing) |
+| Dataset   | Task       | Iterations | GPUs$\times$Days$\times$Bs* | URL                                                          |
+| --------- | ---------- | ---------- | --------------------------- | ------------------------------------------------------------ |
+| Celeba-HQ | Inpainting | 930K       | 2$\times$5$\times$3         | [Google Drive](https://drive.google.com/drive/folders/13YZ2UAmGJ-b7DICr-FDAPM7gctreJEoH?usp=sharing) |
+| Places2   | Inpainting | 660K       | 4$\times$8$\times$10        | [Google Drive](https://drive.google.com/drive/folders/1Vz_HC0LcpV6yMLOd-SXyoaqJHtxyPBxZ?usp=sharing) |
+
+[^*]: Bs indicates sample size per gpu.
 
 
 
@@ -131,7 +135,7 @@ self.load_network(network=self.netG, network_label=netG_label, strict=False)
 python run.py -p train -c config/inpainting_celebahq.json
 ```
 
-We test the U-Net backbone used in `SR3` and `Guided Diffusion`,  and `Guided Diffusion` one have a more robust performance in our current experiments.  More choices about **backbone**, **loss** and **scheduler** can be found in `which_networks`  part of configure file.
+We test the U-Net backbone used in `SR3` and `Guided Diffusion`,  and `Guided Diffusion` one have a more robust performance in our current experiments.  More choices about **backbone**, **loss** and **metric** can be found in `which_networks`  part of configure file.
 
 ### Test
 
