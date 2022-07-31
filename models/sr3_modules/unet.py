@@ -3,19 +3,20 @@ import torch
 from torch import nn
 from inspect import isfunction
 
+
 class UNet(nn.Module):
     def __init__(
-        self,
-        in_channel=6,
-        out_channel=3,
-        inner_channel=32,
-        norm_groups=32,
-        channel_mults=(1, 2, 4, 8, 8),
-        attn_res=(8),
-        res_blocks=3,
-        dropout=0,
-        with_noise_level_emb=True,
-        image_size=128
+            self,
+            in_channel=6,
+            out_channel=3,
+            inner_channel=32,
+            norm_groups=32,
+            channel_mults=(1, 2, 4, 8, 8),
+            attn_res=(8),
+            res_blocks=3,
+            dropout=0,
+            with_noise_level_emb=True,
+            image_size=128
     ):
         super().__init__()
 
@@ -41,21 +42,24 @@ class UNet(nn.Module):
             is_last = (ind == num_mults - 1)
             use_attn = (now_res in attn_res)
             channel_mult = inner_channel * channel_mults[ind]
-            for _ in range(0, res_blocks):
+            for _ in range(res_blocks):
                 downs.append(ResnetBlocWithAttn(
-                    pre_channel, channel_mult, noise_level_emb_dim=noise_level_channel, norm_groups=norm_groups, dropout=dropout, with_attn=use_attn))
+                    pre_channel, channel_mult, noise_level_emb_dim=noise_level_channel, norm_groups=norm_groups,
+                    dropout=dropout, with_attn=use_attn))
                 feat_channels.append(channel_mult)
                 pre_channel = channel_mult
             if not is_last:
                 downs.append(Downsample(pre_channel))
                 feat_channels.append(pre_channel)
-                now_res = now_res//2
+                now_res = now_res // 2
         self.downs = nn.ModuleList(downs)
 
         self.mid = nn.ModuleList([
-            ResnetBlocWithAttn(pre_channel, pre_channel, noise_level_emb_dim=noise_level_channel, norm_groups=norm_groups,
+            ResnetBlocWithAttn(pre_channel, pre_channel, noise_level_emb_dim=noise_level_channel,
+                               norm_groups=norm_groups,
                                dropout=dropout, with_attn=True),
-            ResnetBlocWithAttn(pre_channel, pre_channel, noise_level_emb_dim=noise_level_channel, norm_groups=norm_groups,
+            ResnetBlocWithAttn(pre_channel, pre_channel, noise_level_emb_dim=noise_level_channel,
+                               norm_groups=norm_groups,
                                dropout=dropout, with_attn=False)
         ])
 
@@ -64,43 +68,33 @@ class UNet(nn.Module):
             is_last = (ind < 1)
             use_attn = (now_res in attn_res)
             channel_mult = inner_channel * channel_mults[ind]
-            for _ in range(0, res_blocks+1):
+            for _ in range(res_blocks + 1):
                 ups.append(ResnetBlocWithAttn(
-                    pre_channel+feat_channels.pop(), channel_mult, noise_level_emb_dim=noise_level_channel, norm_groups=norm_groups,
-                        dropout=dropout, with_attn=use_attn))
+                    pre_channel + feat_channels.pop(), channel_mult, noise_level_emb_dim=noise_level_channel,
+                    norm_groups=norm_groups,
+                    dropout=dropout, with_attn=use_attn))
                 pre_channel = channel_mult
             if not is_last:
                 ups.append(Upsample(pre_channel))
-                now_res = now_res*2
+                now_res = now_res * 2
 
         self.ups = nn.ModuleList(ups)
 
         self.final_conv = Block(pre_channel, default(out_channel, in_channel), groups=norm_groups)
 
     def forward(self, x, time):
-        t = self.noise_level_mlp(time) if exists(
-            self.noise_level_mlp) else None
-
+        t = self.noise_level_mlp(time) if exists(self.noise_level_mlp) else None
         feats = []
         for layer in self.downs:
-            if isinstance(layer, ResnetBlocWithAttn):
-                x = layer(x, t)
-            else:
-                x = layer(x)
+            x = layer(x, t) if isinstance(layer, ResnetBlocWithAttn) else layer(x)
             feats.append(x)
-
         for layer in self.mid:
-            if isinstance(layer, ResnetBlocWithAttn):
-                x = layer(x, t)
-            else:
-                x = layer(x)
-
+            x = layer(x, t) if isinstance(layer, ResnetBlocWithAttn) else layer(x)
         for layer in self.ups:
             if isinstance(layer, ResnetBlocWithAttn):
                 x = layer(torch.cat((x, feats.pop()), dim=1), t)
             else:
                 x = layer(x)
-
         return self.final_conv(x)
 
 
@@ -123,7 +117,7 @@ class FeatureWiseAffine(nn.Module):
         super(FeatureWiseAffine, self).__init__()
         self.use_affine_level = use_affine_level
         self.noise_func = nn.Sequential(
-            nn.Linear(in_channels, out_channels*(1+self.use_affine_level))
+            nn.Linear(in_channels, out_channels * (1 + self.use_affine_level))
         )
 
     def forward(self, x, noise_embed):
@@ -236,7 +230,7 @@ class ResnetBlocWithAttn(nn.Module):
 
     def forward(self, x, time_emb):
         x = self.res_block(x, time_emb)
-        if(self.with_attn):
+        if (self.with_attn):
             x = self.attn(x)
         return x
 

@@ -13,9 +13,11 @@ from .nn import (
     gamma_embedding
 )
 
+
 class SiLU(nn.Module):
     def forward(self, x):
         return x * torch.sigmoid(x)
+
 
 class EmbedBlock(nn.Module):
     """
@@ -28,6 +30,7 @@ class EmbedBlock(nn.Module):
         Apply the module to `x` given `emb` embeddings.
         """
 
+
 class EmbedSequential(nn.Sequential, EmbedBlock):
     """
     A sequential module that passes embeddings to the children that
@@ -36,11 +39,9 @@ class EmbedSequential(nn.Sequential, EmbedBlock):
 
     def forward(self, x, emb):
         for layer in self:
-            if isinstance(layer, EmbedBlock):
-                x = layer(x, emb)
-            else:
-                x = layer(x)
+            x = layer(x, emb) if isinstance(layer, EmbedBlock) else layer(x)
         return x
+
 
 class Upsample(nn.Module):
     """
@@ -64,6 +65,7 @@ class Upsample(nn.Module):
         if self.use_conv:
             x = self.conv(x)
         return x
+
 
 class Downsample(nn.Module):
     """
@@ -107,16 +109,16 @@ class ResBlock(EmbedBlock):
     """
 
     def __init__(
-        self,
-        channels,
-        emb_channels,
-        dropout,
-        out_channel=None,
-        use_conv=False,
-        use_scale_shift_norm=False,
-        use_checkpoint=False,
-        up=False,
-        down=False,
+            self,
+            channels,
+            emb_channels,
+            dropout,
+            out_channel=None,
+            use_conv=False,
+            use_scale_shift_norm=False,
+            use_checkpoint=False,
+            up=False,
+            down=False,
     ):
         super().__init__()
         self.channels = channels
@@ -202,6 +204,7 @@ class ResBlock(EmbedBlock):
             h = self.out_layers(h)
         return self.skip_connection(x) + h
 
+
 class AttentionBlock(nn.Module):
     """
     An attention block that allows spatial positions to attend to each other.
@@ -210,12 +213,12 @@ class AttentionBlock(nn.Module):
     """
 
     def __init__(
-        self,
-        channels,
-        num_heads=1,
-        num_head_channels=-1,
-        use_checkpoint=False,
-        use_new_attention_order=False,
+            self,
+            channels,
+            num_heads=1,
+            num_head_channels=-1,
+            use_checkpoint=False,
+            use_new_attention_order=False,
     ):
         super().__init__()
         self.channels = channels
@@ -223,7 +226,7 @@ class AttentionBlock(nn.Module):
             self.num_heads = num_heads
         else:
             assert (
-                channels % num_head_channels == 0
+                    channels % num_head_channels == 0
             ), f"q,k,v channels {channels} is not divisible by num_head_channels {num_head_channels}"
             self.num_heads = channels // num_head_channels
         self.use_checkpoint = use_checkpoint
@@ -315,6 +318,7 @@ class QKVAttention(nn.Module):
     def count_flops(model, _x, y):
         return count_flops_attn(model, _x, y)
 
+
 class UNet(nn.Module):
     """
     The full UNet model with attention and embedding.
@@ -343,24 +347,24 @@ class UNet(nn.Module):
     """
 
     def __init__(
-        self,
-        image_size,
-        in_channel,
-        inner_channel,
-        out_channel,
-        res_blocks,
-        attn_res,
-        dropout=0,
-        channel_mults=(1, 2, 4, 8),
-        conv_resample=True,
-        use_checkpoint=False,
-        use_fp16=False,
-        num_heads=1,
-        num_head_channels=-1,
-        num_heads_upsample=-1,
-        use_scale_shift_norm=True,
-        resblock_updown=True,
-        use_new_attention_order=False,
+            self,
+            image_size,
+            in_channel,
+            inner_channel,
+            out_channel,
+            res_blocks,
+            attn_res,
+            dropout=0,
+            channel_mults=(1, 2, 4, 8),
+            conv_resample=True,
+            use_checkpoint=False,
+            use_fp16=False,
+            num_heads=1,
+            num_head_channels=-1,
+            num_heads_upsample=-1,
+            use_scale_shift_norm=True,
+            resblock_updown=True,
+            use_new_attention_order=False,
     ):
 
         super().__init__()
@@ -544,6 +548,7 @@ class UNet(nn.Module):
         h = h.type(x.dtype)
         return self.out(h)
 
+
 if __name__ == '__main__':
     b, c, h, w = 3, 6, 64, 64
     timsteps = 100
@@ -556,5 +561,5 @@ if __name__ == '__main__':
         attn_res=[8]
     )
     x = torch.randn((b, c, h, w))
-    emb = torch.ones((b, ))
+    emb = torch.ones((b,))
     out = model(x, emb)
