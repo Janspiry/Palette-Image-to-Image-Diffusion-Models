@@ -4,7 +4,7 @@ Various utilities for neural networks.
 
 import math
 import numpy as np
-import torch 
+import torch
 import torch.nn as nn
 
 
@@ -46,7 +46,6 @@ def normalization(channels):
     :return: an nn.Module for normalization.
     """
     return GroupNorm32(32, channels)
-
 
 
 def checkpoint(func, inputs, params, flag):

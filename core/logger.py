@@ -7,10 +7,12 @@ import pandas as pd
 
 import core.util as Util
 
-class InfoLogger():
+
+class InfoLogger:
     """
     use logging to record log, only work on GPU 0 by judging global_rank
     """
+
     def __init__(self, opt):
         self.opt = opt
         self.rank = opt['global_rank']
@@ -21,23 +23,27 @@ class InfoLogger():
         self.infologger_ftns = {'info', 'warning', 'debug'}
 
     def __getattr__(self, name):
-        if self.rank != 0: # info only print on GPU 0.
+        if self.rank != 0:  # info only print on GPU 0.
             def wrapper(info, *args, **kwargs):
                 pass
+
             return wrapper
         if name in self.infologger_ftns:
             print_info = getattr(self.logger, name, None)
+
             def wrapper(info, *args, **kwargs):
                 print_info(info, *args, **kwargs)
+
             return wrapper
-    
+
     @staticmethod
     def setup_logger(logger_name, root, phase, level=logging.INFO, screen=False):
         """ set up logger """
         l = logging.getLogger(logger_name)
-        formatter = logging.Formatter(
-            '%(asctime)s.%(msecs)03d - %(levelname)s: %(message)s', datefmt='%y-%m-%d %H:%M:%S')
-        log_file = os.path.join(root, '{}.log'.format(phase))
+        formatter = logging.Formatter('%(asctime)s.%(msecs)03d - %(levelname)s: %(message)s',
+                                      datefmt='%y-%m-%d %H:%M:%S')
+
+        log_file = os.path.join(root, f'{phase}.log')
         fh = logging.FileHandler(log_file, mode='a+')
         fh.setFormatter(formatter)
         l.setLevel(level)
@@ -47,11 +53,13 @@ class InfoLogger():
             sh.setFormatter(formatter)
             l.addHandler(sh)
 
-class VisualWriter():
+
+class VisualWriter:
     """ 
     use tensorboard to record visuals, support 'add_scalar', 'add_scalars', 'add_image', 'add_images', etc. funtion.
     Also integrated with save results function.
     """
+
     def __init__(self, opt, logger):
         log_dir = opt['path']['tb_logger']
         self.result_dir = opt['path']['results']
@@ -61,7 +69,7 @@ class VisualWriter():
         self.writer = None
         self.selected_module = ""
 
-        if enabled and self.rank==0:
+        if enabled and self.rank == 0:
             log_dir = str(log_dir)
 
             # Retrieve vizualization writer.
@@ -77,8 +85,8 @@ class VisualWriter():
 
             if not succeeded:
                 message = "Warning: visualization (Tensorboard) is configured to use, but currently not installed on " \
-                    "this machine. Please install TensorboardX with 'pip install tensorboardx', upgrade PyTorch to " \
-                    "version >= 1.1 to use 'torch.utils.tensorboard' or turn off the option in the 'config.json' file."
+                          "this machine. Please install TensorboardX with 'pip install tensorboardx', upgrade PyTorch to " \
+                          "version >= 1.1 to use 'torch.utils.tensorboard' or turn off the option in the 'config.json' file."
                 logger.warning(message)
 
         self.epoch = 0
@@ -108,16 +116,16 @@ class VisualWriter():
         try:
             names = results['name']
             outputs = Util.postprocess(results['result'])
-            for i in range(len(names)): 
+            for i in range(len(names)):
                 Image.fromarray(outputs[i]).save(os.path.join(result_path, names[i]))
         except:
-            raise NotImplementedError('You must specify the context of name and result in save_current_results functions of model.')
+            raise NotImplementedError(
+                'You must specify the context of name and result in save_current_results functions of model.')
 
     def close(self):
         self.writer.close()
         print('Close the Tensorboard SummaryWriter.')
 
-        
     def __getattr__(self, name):
         """
         If visualization is configured to use:
@@ -127,12 +135,14 @@ class VisualWriter():
         """
         if name in self.tb_writer_ftns:
             add_data = getattr(self.writer, name, None)
+
             def wrapper(tag, data, *args, **kwargs):
                 if add_data is not None:
                     # add phase(train/valid) tag
                     if name not in self.tag_mode_exceptions:
                         tag = '{}/{}'.format(self.phase, tag)
                     add_data(tag, data, self.iter, *args, **kwargs)
+
             return wrapper
         else:
             # default action for returning methods defined in this class, set_step() for instance.
@@ -147,6 +157,7 @@ class LogTracker:
     """
     record training numerical indicators.
     """
+
     def __init__(self, *keys, phase='train'):
         self.phase = phase
         self._data = pd.DataFrame(index=keys, columns=['total', 'counts', 'average'])
@@ -165,4 +176,4 @@ class LogTracker:
         return self._data.average[key]
 
     def result(self):
-        return {'{}/{}'.format(self.phase, k):v for k, v in dict(self._data.average).items()}
+        return {f'{self.phase}/{k}': v for k, v in dict(self._data.average).items()}
