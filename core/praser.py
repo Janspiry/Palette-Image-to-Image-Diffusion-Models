@@ -7,6 +7,7 @@ from functools import partial
 import importlib
 from types  import FunctionType
 import shutil
+
 def init_obj(opt, logger, *args, default_file_name='default file', given_module=None, init_type='Network', **modify_kwargs):
     """
     finds a function handle with the name given as 'name' in config,
